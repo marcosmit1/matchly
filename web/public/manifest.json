@@ -1,0 +1,22 @@
+{
+  "name": "Matchly",
+  "short_name": "Matchly",
+  "description": "The ultimate tournament companion",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#2C2C2C",
+  "theme_color": "#2C2C2C",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
