@@ -288,13 +288,13 @@ export function TournamentMatches({ tournament, rounds, matches }: TournamentMat
     if (!matchScores) return;
 
     // Validate that Team 1 score is provided (Team 2 is auto-calculated)
-    if (matchScores.p1 === '') {
+    if (matchScores.p1 === '' || matchScores.p1 === null || matchScores.p1 === undefined) {
       alert('Please enter Team 1\'s score');
       return;
     }
 
     const pointsToWin = tournament.points_to_win || 21;
-    const team1Score = parseInt(matchScores.p1) || 0;
+    const team1Score = typeof matchScores.p1 === 'number' ? matchScores.p1 : parseInt(matchScores.p1) || 0;
     const team2Score = pointsToWin - team1Score;
 
     // Validate that the score is within valid range
