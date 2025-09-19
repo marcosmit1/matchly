@@ -6,6 +6,7 @@ import { Button } from "@/blocks/button";
 import Link from "next/link";
 
 interface UserStats {
+  player_id: string;
   matches_played: number;
   matches_won: number;
   games_won: number;
@@ -14,6 +15,7 @@ interface UserStats {
   points_lost: number;
   win_rate: number;
   skill_level: number;
+  last_match_at: string | null;
 }
 
 interface PlaytomicHomeProps {
