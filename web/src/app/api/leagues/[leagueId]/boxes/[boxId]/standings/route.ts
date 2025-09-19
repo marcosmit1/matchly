@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { leagueId: string; boxId: string } }
+  { params }: { params: Promise<{ leagueId: string; boxId: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -15,7 +15,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { leagueId, boxId } = params;
+    const { leagueId, boxId } = await params;
 
     // Get box standings
     const { data: standings, error: standingsError } = await supabase.rpc(
