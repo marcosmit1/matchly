@@ -5,6 +5,63 @@ import { Button } from "@/blocks/button";
 import { Input } from "@/blocks/input";
 import { Trophy, Users, Calendar, MapPin, Target, Copy, Share, Check } from "lucide-react";
 import { LoadingSpinner } from "@/components/loading-spinner";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
+// Custom styles for the date picker
+const customDatePickerStyles = `
+  .react-datepicker-wrapper {
+    width: 100%;
+  }
+  
+  .react-datepicker__input-container input {
+    width: 100%;
+    height: 48px;
+    padding-left: 40px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    background-color: white;
+    color: #111827;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.2s;
+  }
+  
+  .react-datepicker__input-container input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  }
+  
+  .react-datepicker__input-container input::placeholder {
+    color: #9ca3af;
+  }
+  
+  .react-datepicker {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    font-family: inherit;
+  }
+  
+  .react-datepicker__header {
+    background-color: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .react-datepicker__day--selected {
+    background-color: #3b82f6;
+    color: white;
+  }
+  
+  .react-datepicker__day--selected:hover {
+    background-color: #2563eb;
+  }
+  
+  .react-datepicker__day:hover {
+    background-color: #f3f4f6;
+  }
+`;
 
 interface Sport {
   id: string;
@@ -40,13 +97,20 @@ export function CreateLeagueForm() {
     description: "",
     sport: "",
     maxPlayers: 8,
-    startDate: "",
+    startDate: null as Date | null,
     location: "",
     entryFee: 0,
-    prizePool: 0
+    prizePool: 0,
+    // Box configuration options
+    numberOfBoxes: null as number | null,
+    minPlayersPerBox: null as number | null,
+    maxPlayersPerBox: null as number | null
   });
 
-  const handleInputChange = (field: string, value: string | number) => {
+  const [hasEntryFee, setHasEntryFee] = useState(false);
+  const [hasPrizePool, setHasPrizePool] = useState(false);
+
+  const handleInputChange = (field: string, value: string | number | Date | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -67,6 +131,12 @@ export function CreateLeagueForm() {
         body: JSON.stringify({
           ...formData,
           max_players: formData.maxPlayers, // Convert camelCase to snake_case
+          start_date: formData.startDate ? formData.startDate.toISOString().split('T')[0] : null,
+          entry_fee: hasEntryFee ? formData.entryFee : 0,
+          prize_pool: hasPrizePool ? formData.prizePool : 0,
+          number_of_boxes: formData.numberOfBoxes,
+          min_players_per_box: formData.minPlayersPerBox,
+          max_players_per_box: formData.maxPlayersPerBox,
         }),
       });
 
@@ -195,12 +265,13 @@ export function CreateLeagueForm() {
 
   return (
     <div className="space-y-6">
+      <style dangerouslySetInnerHTML={{ __html: customDatePickerStyles }} />
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">League Details</h2>
         <p className="text-gray-600">Fill in the details for your {SPORTS.find(s => s.id === formData.sport)?.name} league</p>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm p-6 space-y-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
         {/* League Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -213,7 +284,7 @@ export function CreateLeagueForm() {
               placeholder="Enter league name"
               value={formData.name}
               onChange={(e) => handleInputChange("name", e.target.value)}
-              className="pl-10 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
+              className="pl-3 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
             />
           </div>
         </div>
@@ -223,12 +294,15 @@ export function CreateLeagueForm() {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Description
           </label>
-          <textarea
-            placeholder="Describe your league..."
-            value={formData.description}
-            onChange={(e) => handleInputChange("description", e.target.value)}
-            className="w-full h-24 p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white text-gray-900 placeholder:text-gray-400"
-          />
+          <div className="relative">
+            <Target className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+            <textarea
+              placeholder="Describe your league..."
+              value={formData.description}
+              onChange={(e) => handleInputChange("description", e.target.value)}
+              className="pl-3 w-full h-24 pt-3 pr-3 pb-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white text-gray-900 placeholder:text-gray-400"
+            />
+          </div>
         </div>
 
         {/* Max Players */}
@@ -240,36 +314,44 @@ export function CreateLeagueForm() {
             <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="number"
-              placeholder="8"
-              value={formData.maxPlayers}
+              placeholder="Enter max players"
+              value={formData.maxPlayers || ""}
               onChange={(e) => handleInputChange("maxPlayers", parseInt(e.target.value) || 8)}
-              className="pl-10 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
+              className="pl-3 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
               min="4"
               max="32"
             />
           </div>
+          <p className="text-xs text-gray-500 mt-1">Minimum 4, maximum 32 players</p>
         </div>
 
         {/* Start Date */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Start Date
+            Start Date (Optional)
           </label>
           <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="date"
-              value={formData.startDate}
-              onChange={(e) => handleInputChange("startDate", e.target.value)}
-              className="pl-10 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400 [color-scheme:light]"
+            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+            <DatePicker
+              selected={formData.startDate}
+              onChange={(date) => handleInputChange("startDate", date)}
+              placeholderText="Select start date"
+              dateFormat="dd/MM/yyyy"
+              minDate={new Date()}
+              wrapperClassName="w-full"
+              showPopperArrow={false}
+              isClearable
+              autoComplete="off"
+              popperClassName="react-datepicker-popper"
             />
           </div>
+          <p className="text-xs text-gray-500 mt-1">Leave empty if start date is flexible</p>
         </div>
 
         {/* Location */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Location
+            Location (Optional)
           </label>
           <div className="relative">
             <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -278,41 +360,170 @@ export function CreateLeagueForm() {
               placeholder="Enter location or venue"
               value={formData.location}
               onChange={(e) => handleInputChange("location", e.target.value)}
-              className="pl-10 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
+              className="pl-3 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
             />
           </div>
+          <p className="text-xs text-gray-500 mt-1">Where will the league take place?</p>
         </div>
 
         {/* Entry Fee */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Entry Fee (€)
-          </label>
-          <input
-            type="number"
-            placeholder="0"
-            value={formData.entryFee || ""}
-            onChange={(e) => handleInputChange("entryFee", parseFloat(e.target.value) || 0)}
-            className="w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
-            min="0"
-            step="0.01"
-          />
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-gray-700">
+              Entry Fee
+            </label>
+            <button
+              type="button"
+              onClick={() => setHasEntryFee(!hasEntryFee)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                hasEntryFee ? 'bg-blue-600' : 'bg-gray-200'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  hasEntryFee ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+          
+          {hasEntryFee && (
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span className="text-gray-500 text-sm">€</span>
+              </div>
+              <input
+                type="number"
+                placeholder="0.00"
+                value={formData.entryFee || ""}
+                onChange={(e) => handleInputChange("entryFee", parseFloat(e.target.value) || 0)}
+                className="pl-8 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
+                min="0"
+                step="0.01"
+              />
+            </div>
+          )}
         </div>
 
         {/* Prize Pool */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Prize Pool (€)
-          </label>
-          <input
-            type="number"
-            placeholder="0"
-            value={formData.prizePool || ""}
-            onChange={(e) => handleInputChange("prizePool", parseFloat(e.target.value) || 0)}
-            className="w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
-            min="0"
-            step="0.01"
-          />
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-gray-700">
+              Prize Pool
+            </label>
+            <button
+              type="button"
+              onClick={() => setHasPrizePool(!hasPrizePool)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                hasPrizePool ? 'bg-blue-600' : 'bg-gray-200'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  hasPrizePool ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+          
+          {hasPrizePool && (
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span className="text-gray-500 text-sm">€</span>
+              </div>
+              <input
+                type="number"
+                placeholder="0.00"
+                value={formData.prizePool || ""}
+                onChange={(e) => handleInputChange("prizePool", parseFloat(e.target.value) || 0)}
+                className="pl-8 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
+                min="0"
+                step="0.01"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Box Configuration Section */}
+        <div className="border-t border-gray-200 pt-6">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Box Configuration (Optional)</h3>
+            <p className="text-sm text-gray-600">Customize how players are organized into boxes. Leave empty for automatic calculation.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Number of Boxes */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Number of Boxes
+              </label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 flex items-center justify-center">
+                  <span className="text-lg font-bold">#</span>
+                </div>
+                <input
+                  type="number"
+                  placeholder="Auto-calculate"
+                  value={formData.numberOfBoxes || ""}
+                  onChange={(e) => handleInputChange("numberOfBoxes", e.target.value ? parseInt(e.target.value) : null)}
+                  className="pl-3 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
+                  min="1"
+                  max={formData.maxPlayers}
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Specify exact number of boxes</p>
+            </div>
+
+            {/* Min Players per Box */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Min Players per Box
+              </label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 flex items-center justify-center">
+                  <span className="text-sm font-bold">↓</span>
+                </div>
+                <input
+                  type="number"
+                  placeholder="Auto-calculate"
+                  value={formData.minPlayersPerBox || ""}
+                  onChange={(e) => handleInputChange("minPlayersPerBox", e.target.value ? parseInt(e.target.value) : null)}
+                  className="pl-3 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
+                  min="2"
+                  max="8"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Minimum players per box</p>
+            </div>
+
+            {/* Max Players per Box */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Max Players per Box
+              </label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 flex items-center justify-center">
+                  <span className="text-sm font-bold">↑</span>
+                </div>
+                <input
+                  type="number"
+                  placeholder="Auto-calculate"
+                  value={formData.maxPlayersPerBox || ""}
+                  onChange={(e) => handleInputChange("maxPlayersPerBox", e.target.value ? parseInt(e.target.value) : null)}
+                  className="pl-3 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
+                  min="2"
+                  max="12"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Maximum players per box</p>
+            </div>
+          </div>
+
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>Examples:</strong> 8 players with 2 boxes = 4 players each. 12 players with min 3, max 5 = 3 boxes of 4 players each.
+            </p>
+          </div>
         </div>
 
         {/* Action Buttons */}
@@ -326,7 +537,7 @@ export function CreateLeagueForm() {
           <Button
             onClick={handleSubmit}
             disabled={loading || !formData.name || !formData.sport}
-            className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium"
+            className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors"
           >
             {loading ? (
               <LoadingSpinner size="sm" color="white" />

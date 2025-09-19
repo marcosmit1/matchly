@@ -35,7 +35,7 @@ BEGIN
     v_invite_code := substring(md5(random()::text) from 1 for 8);
     
     -- Create invite link
-    v_invite_link := 'https://tournamator.app/join/' || v_invite_code;
+    v_invite_link := 'https://matchly.app/join/' || v_invite_code;
     
     -- Insert league
     INSERT INTO leagues (

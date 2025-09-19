@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, MapPin, Users, Calendar, Trophy, Plus } from 'lucide-react';
+import { Search, MapPin, Users, Calendar, Trophy, Plus, Target } from 'lucide-react';
 import Link from 'next/link';
 
 interface League {
@@ -21,23 +21,51 @@ interface League {
   };
 }
 
+interface Tournament {
+  id: string;
+  name: string;
+  description: string;
+  sport: string;
+  max_players: number;
+  current_players: number;
+  start_date: string;
+  location: string;
+  status: string;
+  created_by: string;
+  created_at: string;
+  tournament_type: string;
+  number_of_courts: number;
+  points_to_win: number;
+  users: {
+    username: string;
+  };
+}
+
 export function DiscoverView() {
   const [leagues, setLeagues] = useState<League[]>([]);
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sportFilter, setSportFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'leagues' | 'tournaments'>('all');
 
   useEffect(() => {
-    fetchPublicLeagues();
+    fetchPublicData();
   }, []);
 
-  const fetchPublicLeagues = async () => {
+  const fetchPublicData = async () => {
     try {
-      const response = await fetch('/api/leagues?public=true');
-      const data = await response.json();
-      setLeagues(data.leagues || []);
+      // Fetch leagues
+      const leaguesResponse = await fetch('/api/leagues?public=true');
+      const leaguesData = await leaguesResponse.json();
+      setLeagues(leaguesData.leagues || []);
+
+      // Fetch tournaments
+      const tournamentsResponse = await fetch('/api/tournaments?public=true');
+      const tournamentsData = await tournamentsResponse.json();
+      setTournaments(tournamentsData.tournaments || []);
     } catch (error) {
-      console.error('Error fetching public leagues:', error);
+      console.error('Error fetching public data:', error);
     } finally {
       setLoading(false);
     }
@@ -47,7 +75,16 @@ export function DiscoverView() {
     const matchesSearch = league.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          league.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSport = sportFilter === 'all' || league.sport === sportFilter;
-    return matchesSearch && matchesSport && league.status === 'open';
+    const matchesType = typeFilter === 'all' || typeFilter === 'leagues';
+    return matchesSearch && matchesSport && matchesType && league.status === 'open';
+  });
+
+  const filteredTournaments = tournaments.filter(tournament => {
+    const matchesSearch = tournament.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         tournament.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSport = sportFilter === 'all' || tournament.sport === sportFilter;
+    const matchesType = typeFilter === 'all' || typeFilter === 'tournaments';
+    return matchesSearch && matchesSport && matchesType && tournament.status === 'open';
   });
 
   const getSportIcon = (sport: string) => {
@@ -85,7 +122,7 @@ export function DiscoverView() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Search leagues..."
+            placeholder="Search leagues and tournaments..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -107,25 +144,54 @@ export function DiscoverView() {
             </button>
           ))}
         </div>
+
+        <div className="flex space-x-2 overflow-x-auto pb-2">
+          {[
+            { key: 'all', label: 'All', icon: '🏆' },
+            { key: 'leagues', label: 'Leagues', icon: '🏆' },
+            { key: 'tournaments', label: 'Tournaments', icon: '🎯' }
+          ].map((type) => (
+            <button
+              key={type.key}
+              onClick={() => setTypeFilter(type.key as 'all' | 'leagues' | 'tournaments')}
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap flex items-center space-x-1 ${
+                typeFilter === type.key
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <span>{type.icon}</span>
+              <span>{type.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Create League Button */}
-      <Link href="/create-league">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-4 flex items-center justify-center space-x-2 hover:from-blue-700 hover:to-purple-700 transition-all">
-          <Plus className="w-5 h-5" />
-          <span className="font-medium">Create New League</span>
-        </div>
-      </Link>
+      {/* Create Buttons */}
+      <div className="grid grid-cols-2 gap-3">
+        <Link href="/create-league">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-4 flex items-center justify-center space-x-2 hover:from-blue-700 hover:to-purple-700 transition-all">
+            <Trophy className="w-5 h-5" />
+            <span className="font-medium">Create League</span>
+          </div>
+        </Link>
+        <Link href="/create-tournament">
+          <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl p-4 flex items-center justify-center space-x-2 hover:from-purple-700 hover:to-pink-700 transition-all">
+            <Target className="w-5 h-5" />
+            <span className="font-medium">Create Tournament</span>
+          </div>
+        </Link>
+      </div>
 
-      {/* Leagues List */}
-      {filteredLeagues.length === 0 ? (
+      {/* Content List */}
+      {(filteredLeagues.length === 0 && filteredTournaments.length === 0) ? (
         <div className="text-center py-12">
           <Trophy className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No leagues found</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No content found</h3>
           <p className="text-gray-500">
-            {searchTerm || sportFilter !== 'all' 
+            {searchTerm || sportFilter !== 'all' || typeFilter !== 'all'
               ? 'Try adjusting your search or filters'
-              : 'Be the first to create a league!'
+              : 'Be the first to create a league or tournament!'
             }
           </p>
         </div>
@@ -175,6 +241,73 @@ export function DiscoverView() {
                   </span>
                   <span className="text-xs text-gray-500">
                     {new Date(league.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ))}
+
+          {/* Tournaments */}
+          {filteredTournaments.map((tournament) => (
+            <Link key={`tournament-${tournament.id}`} href={`/tournaments/${tournament.id}`}>
+              <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="text-2xl">{getSportIcon(tournament.sport)}</div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{tournament.name}</h3>
+                      <p className="text-sm text-gray-600 capitalize">{tournament.sport} Tournament</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
+                      Tournament
+                    </span>
+                    <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">
+                      {tournament.tournament_type}
+                    </span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(tournament.status)}`}>
+                      {tournament.status}
+                    </span>
+                  </div>
+                </div>
+
+                {tournament.description && (
+                  <p className="text-gray-700 text-sm mb-3 line-clamp-2">{tournament.description}</p>
+                )}
+
+                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                  <div className="flex items-center space-x-2">
+                    <Users className="w-4 h-4" />
+                    <span>{tournament.current_players}/{tournament.max_players} players</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Target className="w-4 h-4" />
+                    <span>{tournament.number_of_courts} courts</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span>🎯</span>
+                    <span>{tournament.points_to_win} points</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>{new Date(tournament.start_date).toLocaleDateString()}</span>
+                  </div>
+                </div>
+
+                {tournament.location && (
+                  <div className="flex items-center space-x-2 text-sm text-gray-600 mt-2">
+                    <MapPin className="w-4 h-4" />
+                    <span>{tournament.location}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                  <span className="text-xs text-gray-500">
+                    Created by Tournament Creator
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {new Date(tournament.created_at).toLocaleDateString()}
                   </span>
                 </div>
               </div>

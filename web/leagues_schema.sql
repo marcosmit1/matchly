@@ -1,5 +1,5 @@
 -- =====================================================
--- TOURNAMATOR LEAGUES SCHEMA
+-- matchly LEAGUES SCHEMA
 -- =====================================================
 -- This script creates the database schema for league management
 -- Core concept: Create leagues, invite players, start when ready
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS public.leagues (
     -- League status and management
     status VARCHAR(20) DEFAULT 'open' CHECK (status IN ('open', 'full', 'started', 'completed', 'cancelled')),
     invite_code VARCHAR(8) UNIQUE NOT NULL DEFAULT substring(gen_random_uuid()::text, 1, 8),
-    invite_link TEXT GENERATED ALWAYS AS ('https://tournamator.app/join/' || invite_code) STORED,
+    invite_link TEXT GENERATED ALWAYS AS ('https://matchly.app/join/' || invite_code) STORED,
     
     -- Admin and metadata
     created_by UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,

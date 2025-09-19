@@ -22,6 +22,10 @@ export async function POST(request: NextRequest) {
       location,
       entry_fee = 0,
       prize_pool = 0,
+      // Box configuration parameters
+      number_of_boxes = null,
+      min_players_per_box = null,
+      max_players_per_box = null,
     } = body;
 
     // Validate required fields
@@ -50,6 +54,10 @@ export async function POST(request: NextRequest) {
       p_location: location,
       p_entry_fee: entry_fee,
       p_prize_pool: prize_pool,
+      // Box configuration parameters
+      p_number_of_boxes: number_of_boxes,
+      p_min_players_per_box: min_players_per_box,
+      p_max_players_per_box: max_players_per_box,
     });
 
     if (error) {

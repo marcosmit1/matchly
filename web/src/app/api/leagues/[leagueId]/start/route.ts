@@ -30,15 +30,25 @@ export async function POST(
       );
     }
 
-    // Get all confirmed participants
+    // Get all confirmed participants (including guests)
     const { data: participants, error: participantsError } = await supabase
       .from("league_participants")
       .select(`
+        id,
         user_id,
+        guest_player_id,
+        status,
+        joined_at,
         users!league_participants_user_id_fkey(
           id,
           email,
           raw_user_meta_data
+        ),
+        guest_players!league_participants_guest_player_id_fkey(
+          id,
+          name,
+          email,
+          phone
         )
       `)
       .eq("league_id", leagueId)
@@ -52,16 +62,53 @@ export async function POST(
       );
     }
 
-    const participantCount = participants.length;
+    // Format participants data
+    const formattedParticipants = participants?.map(participant => ({
+      participant_id: participant.id,
+      user_id: participant.user_id,
+      guest_player_id: participant.guest_player_id,
+      name: participant.user_id 
+        ? (participant.users?.raw_user_meta_data?.username || participant.users?.email)
+        : participant.guest_players?.name,
+      email: participant.user_id 
+        ? participant.users?.email 
+        : participant.guest_players?.email,
+      phone: participant.guest_players?.phone,
+      status: participant.status,
+      is_guest: !!participant.guest_player_id,
+      joined_at: participant.joined_at
+    })) || [];
 
-    // Calculate optimal box configuration
-    const boxConfig = calculateBoxConfiguration(participantCount);
+    const participantCount = formattedParticipants.length;
+
+    // Get league details to check for custom box configuration
+    const { data: league, error: leagueError } = await supabase
+      .from("leagues")
+      .select("number_of_boxes, min_players_per_box, max_players_per_box")
+      .eq("id", leagueId)
+      .single();
+
+    if (leagueError) {
+      console.error("Error fetching league:", leagueError);
+      return NextResponse.json(
+        { error: "Failed to fetch league details" },
+        { status: 500 }
+      );
+    }
+
+    // Calculate optimal box configuration using flexible logic
+    const boxConfig = calculateFlexibleBoxConfiguration(
+      participantCount,
+      league.number_of_boxes,
+      league.min_players_per_box,
+      league.max_players_per_box
+    );
     
     // Create boxes and assign players
     const { data: boxes, error: boxesError } = await createBoxesAndAssignPlayers(
       supabase,
       leagueId,
-      participants,
+      formattedParticipants,
       boxConfig
     );
 
@@ -105,7 +152,136 @@ export async function POST(
   }
 }
 
-// Helper function to calculate optimal box configuration
+// Helper function to calculate flexible box configuration
+function calculateFlexibleBoxConfiguration(
+  playerCount: number, 
+  numberOfBoxes?: number | null, 
+  minPlayersPerBox?: number | null, 
+  maxPlayersPerBox?: number | null
+): {
+  total_players: number;
+  box_count: number;
+  players_per_box: number;
+  box_size_range: string;
+  boxSizes: number[];
+} {
+  // If specific number of boxes is provided, use that
+  if (numberOfBoxes) {
+    return calculateCustomBoxConfiguration(playerCount, numberOfBoxes);
+  }
+  
+  // If min/max players per box is provided, calculate optimal box count
+  if (minPlayersPerBox || maxPlayersPerBox) {
+    return calculateOptimalBoxConfiguration(playerCount, minPlayersPerBox, maxPlayersPerBox);
+  }
+  
+  // Default to automatic calculation
+  const config = calculateBoxConfiguration(playerCount);
+  return {
+    ...config,
+    boxSizes: generateBoxSizes(config.box_count, config.players_per_box, 0)
+  };
+}
+
+// Helper function to calculate custom box configuration
+function calculateCustomBoxConfiguration(playerCount: number, numberOfBoxes: number): {
+  total_players: number;
+  box_count: number;
+  players_per_box: number;
+  box_size_range: string;
+  boxSizes: number[];
+} {
+  if (numberOfBoxes <= 0) {
+    throw new Error('Number of boxes must be greater than 0');
+  }
+  
+  if (numberOfBoxes > playerCount) {
+    throw new Error('Number of boxes cannot be greater than number of players');
+  }
+  
+  const playersPerBox = Math.floor(playerCount / numberOfBoxes);
+  const remainder = playerCount % numberOfBoxes;
+  const boxSizes = generateBoxSizes(numberOfBoxes, playersPerBox, remainder);
+  
+  return {
+    total_players: playerCount,
+    box_count: numberOfBoxes,
+    players_per_box: playersPerBox,
+    box_size_range: `${Math.min(...boxSizes)}-${Math.max(...boxSizes)}`,
+    boxSizes
+  };
+}
+
+// Helper function to calculate optimal box configuration based on min/max players per box
+function calculateOptimalBoxConfiguration(
+  playerCount: number, 
+  minPlayersPerBox?: number | null, 
+  maxPlayersPerBox?: number | null
+): {
+  total_players: number;
+  box_count: number;
+  players_per_box: number;
+  box_size_range: string;
+  boxSizes: number[];
+} {
+  const minPlayers = minPlayersPerBox || 2;
+  const maxPlayers = maxPlayersPerBox || 8;
+  
+  if (minPlayers > maxPlayers) {
+    throw new Error('Minimum players per box cannot be greater than maximum players per box');
+  }
+  
+  if (playerCount < minPlayers) {
+    throw new Error(`Not enough players. Need at least ${minPlayers} players.`);
+  }
+  
+  // Calculate optimal number of boxes
+  // Start with maximum possible boxes (using min players per box)
+  let optimalBoxes = Math.floor(playerCount / minPlayers);
+  let playersPerBox = Math.floor(playerCount / optimalBoxes);
+  
+  // Adjust if we exceed maximum players per box
+  while (playersPerBox > maxPlayers && optimalBoxes < playerCount) {
+    optimalBoxes++;
+    playersPerBox = Math.floor(playerCount / optimalBoxes);
+  }
+  
+  // Check if it's possible with given constraints
+  if (playersPerBox < minPlayers) {
+    throw new Error(`Cannot create boxes with minimum ${minPlayers} players. Try reducing min players or increasing total players.`);
+  }
+  
+  const remainder = playerCount % optimalBoxes;
+  const boxSizes = generateBoxSizes(optimalBoxes, playersPerBox, remainder);
+  
+  // Final validation: ensure no box exceeds max players
+  const maxBoxSize = Math.max(...boxSizes);
+  if (maxBoxSize > maxPlayers) {
+    throw new Error(`Cannot create boxes with maximum ${maxPlayers} players. The optimal configuration would have ${maxBoxSize} players in some boxes. Try increasing max players or reducing total players.`);
+  }
+  
+  return {
+    total_players: playerCount,
+    box_count: optimalBoxes,
+    players_per_box: playersPerBox,
+    box_size_range: `${minPlayers}-${maxPlayers}`,
+    boxSizes
+  };
+}
+
+// Helper function to generate box sizes array
+function generateBoxSizes(boxes: number, playersPerBox: number, remainder: number): number[] {
+  const boxSizes: number[] = [];
+  for (let i = 0; i < boxes; i++) {
+    const playersInBox = i === boxes - 1 && remainder > 0
+      ? playersPerBox + remainder
+      : playersPerBox;
+    boxSizes.push(playersInBox);
+  }
+  return boxSizes;
+}
+
+// Helper function to calculate optimal box configuration (default/fallback)
 function calculateBoxConfiguration(participantCount: number) {
   // Ideal box size is 5 players for optimal round-robin
   const idealBoxSize = 5;
@@ -159,16 +335,18 @@ async function createBoxesAndAssignPlayers(
   const boxes = [];
   
   for (let boxNumber = 1; boxNumber <= box_count; boxNumber++) {
+    // Get the number of players for this specific box
+    const playersInThisBox = boxConfig.boxSizes ? boxConfig.boxSizes[boxNumber - 1] : players_per_box;
+    
     // Create box
     const { data: box, error: boxError } = await supabase
       .from("league_boxes")
       .insert({
         league_id: leagueId,
-        box_number: boxNumber,
-        box_level: boxNumber, // Higher number = higher skill level
-        max_players: players_per_box,
-        current_players: 0,
-        status: "active",
+        level: boxNumber, // Use 'level' instead of 'box_number' and 'box_level'
+        name: `Box ${boxNumber}`, // Add name field
+        max_players: playersInThisBox,
+        current_players: playersInThisBox,
       })
       .select()
       .single();
@@ -178,8 +356,10 @@ async function createBoxesAndAssignPlayers(
     }
 
     // Assign players to this box
-    const startIndex = (boxNumber - 1) * players_per_box;
-    const endIndex = Math.min(startIndex + players_per_box, shuffledParticipants.length);
+    const startIndex = boxNumber === 1 ? 0 : boxConfig.boxSizes ? 
+      boxConfig.boxSizes.slice(0, boxNumber - 1).reduce((sum, size) => sum + size, 0) :
+      (boxNumber - 1) * players_per_box;
+    const endIndex = startIndex + playersInThisBox;
     const boxPlayers = shuffledParticipants.slice(startIndex, endIndex);
 
     for (const participant of boxPlayers) {
@@ -198,11 +378,7 @@ async function createBoxesAndAssignPlayers(
       }
     }
 
-    // Update box player count
-    await supabase
-      .from("league_boxes")
-      .update({ current_players: boxPlayers.length })
-      .eq("id", box.id);
+    // Box player count is already set correctly during creation
 
     boxes.push({
       ...box,
@@ -245,20 +421,40 @@ async function generateInitialMatches(supabase: any, leagueId: string, boxes: an
 // Helper function to generate round-robin matches
 function generateRoundRobinMatches(players: any[], boxId: string, leagueId: string) {
   const matches = [];
-  const playerIds = players.map(p => p.user_id);
   
   // Generate all possible pairings
-  for (let i = 0; i < playerIds.length; i++) {
-    for (let j = i + 1; j < playerIds.length; j++) {
-      matches.push({
+  for (let i = 0; i < players.length; i++) {
+    for (let j = i + 1; j < players.length; j++) {
+      const player1 = players[i];
+      const player2 = players[j];
+      
+      const match: any = {
         league_id: leagueId,
         box_id: boxId,
-        player1_id: playerIds[i],
-        player2_id: playerIds[j],
         status: "scheduled",
         match_type: "round_robin",
         created_at: new Date().toISOString(),
-      });
+      };
+      
+      // Handle player1 (registered user or guest)
+      if (player1.user_id) {
+        match.player1_id = player1.user_id;
+        match.player1_username = player1.name;
+      } else if (player1.guest_player_id) {
+        match.player1_guest_id = player1.guest_player_id;
+        match.player1_username = player1.name;
+      }
+      
+      // Handle player2 (registered user or guest)
+      if (player2.user_id) {
+        match.player2_id = player2.user_id;
+        match.player2_username = player2.name;
+      } else if (player2.guest_player_id) {
+        match.player2_guest_id = player2.guest_player_id;
+        match.player2_username = player2.name;
+      }
+      
+      matches.push(match);
     }
   }
   

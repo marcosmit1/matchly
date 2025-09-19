@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/blocks/button";
 import { Trophy, Users, Calendar, MapPin, Copy, Share, Play, Settings, Target, Clock } from "lucide-react";
 import { showToast } from "@/components/toast";
+import { GuestPlayerManager } from "@/components/guest-player-manager";
 
 interface League {
   id: string;
@@ -430,40 +431,11 @@ export function LeagueDetails({ leagueId }: { leagueId: string }) {
 
       {/* Participants */}
       <div className="bg-white rounded-2xl p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Participants ({participants.length})</h3>
-        
-        {participants.length === 0 ? (
-          <div className="text-center py-8">
-            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Users className="w-6 h-6 text-gray-400" />
-            </div>
-            <p className="text-gray-600">No participants yet</p>
-            <p className="text-sm text-gray-500 mt-1">Share the invite code to get players to join</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {participants.map((participant, index) => (
-              <div key={participant.id || `${participant.user_id}-${index}`} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-medium text-blue-600">{index + 1}</span>
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{participant.username || `Player ${participant.user_id.slice(0, 8)}`}</p>
-                    <p className="text-sm text-gray-600">
-                      Joined {formatDate(participant.joined_at)}
-                    </p>
-                  </div>
-                </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  participant.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                }`}>
-                  {participant.status}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
+        <GuestPlayerManager 
+          leagueId={leagueId} 
+          maxPlayers={league?.max_players || 8}
+          currentPlayers={league?.current_players || 0}
+        />
       </div>
 
       {/* Actions */}

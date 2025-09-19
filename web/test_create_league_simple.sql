@@ -19,6 +19,6 @@ INSERT INTO leagues (
     'squash', 
     8, 
     'test123', 
-    'https://tournamator.app/join/test123', 
+    'https://matchly.app/join/test123', 
     auth.uid()
 ) RETURNING id, name, invite_code;

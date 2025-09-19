@@ -1,4 +1,4 @@
--- Test Data Script for Tournamator
+-- Test Data Script for matchly
 -- This script creates 20 test players and adds them to your league
 -- Replace 'YOUR_LEAGUE_ID' with your actual league ID
 

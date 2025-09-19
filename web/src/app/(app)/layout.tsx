@@ -9,7 +9,7 @@ import { ServiceWorkerNavigation } from "@/components/service-worker-navigation"
 import { ToastContainer } from "@/components/toast";
 
 export const metadata: Metadata = {
-  title: "Tournamator",
+  title: "matchly",
   description: "The ultimate tournament companion",
   manifest: "/manifest.json",
 };

@@ -1,8 +1,8 @@
-# 🏆 Tournamator League API Documentation
+# 🏆 matchly League API Documentation
 
 ## Overview
 
-The Tournamator League API implements a **box-based promotion/relegation system** where players are grouped by skill level and can move between boxes based on performance. This creates dynamic skill-based matchmaking that continuously adjusts to player abilities.
+The matchly League API implements a **box-based promotion/relegation system** where players are grouped by skill level and can move between boxes based on performance. This creates dynamic skill-based matchmaking that continuously adjusts to player abilities.
 
 ## 🎯 Core Concept
 
@@ -53,7 +53,7 @@ POST /api/leagues
     "prize_pool": 200.00,
     "status": "open",
     "invite_code": "ABC12345",
-    "invite_link": "https://tournamator.app/join/ABC12345",
+    "invite_link": "https://matchly.app/join/ABC12345",
     "created_at": "2024-01-15T10:00:00Z"
   }
 }
