@@ -3,14 +3,14 @@ import { notFound } from "next/navigation";
 import { TournamentMatches } from "./tournament-matches";
 
 interface TournamentMatchesPageProps {
-  params: {
+  params: Promise<{
     tournamentId: string;
-  };
+  }>;
 }
 
 export default async function TournamentMatchesPage({ params }: TournamentMatchesPageProps) {
   const supabase = await createClient();
-  const { tournamentId } = params;
+  const { tournamentId } = await params;
 
   // Fetch tournament details
   const { data: tournament, error: tournamentError } = await supabase
