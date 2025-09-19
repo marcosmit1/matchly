@@ -10,7 +10,7 @@ export default function TournamentNotFound() {
         </div>
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Tournament Not Found</h1>
         <p className="text-gray-600 mb-8">
-          The tournament you're looking for doesn't exist or has been removed.
+          The tournament you&apos;re looking for doesn&apos;t exist or has been removed.
         </p>
         <Link
           href="/discover"

@@ -6,7 +6,7 @@ import { createClient } from "@/supabase/client";
 import { GAME_VIEW } from "../blocks/game-view";
 import { GAME } from "@/types/game";
 import { gamecolors } from "@/lib/game-theme";
-import BubblesBackground from "@/components/bubbles-background";
+// import BubblesBackground from "@/components/bubbles-background"; // Removed - component not found
 
 interface REALTIME_GAME_WRAPPER_PROPS {
   gameid: string;
@@ -105,7 +105,7 @@ export function REALTIME_GAME_WRAPPER({ gameid }: REALTIME_GAME_WRAPPER_PROPS) {
             background: `linear-gradient(135deg, ${gamecolors.dark}, ${gamecolors.main})`,
           }}
         />
-        <BubblesBackground />
+        {/* <BubblesBackground /> - Removed component */}
         <div className="relative z-10 text-center">
           <div className="text-xl font-semibold text-white mb-4">Loading game...</div>
           <div className="text-sm text-white opacity-70">🎮 Setting up realtime connection...</div>
@@ -123,7 +123,7 @@ export function REALTIME_GAME_WRAPPER({ gameid }: REALTIME_GAME_WRAPPER_PROPS) {
             background: `linear-gradient(135deg, ${gamecolors.dark}, ${gamecolors.main})`,
           }}
         />
-        <BubblesBackground />
+        {/* <BubblesBackground /> - Removed component */}
         <div className="relative z-10 text-center">
           <div className="text-xl font-semibold text-white mb-4">❌ {error}</div>
           <div className="text-sm text-white opacity-70">Redirecting to game list...</div>
@@ -141,7 +141,7 @@ export function REALTIME_GAME_WRAPPER({ gameid }: REALTIME_GAME_WRAPPER_PROPS) {
             background: `linear-gradient(135deg, ${gamecolors.dark}, ${gamecolors.main})`,
           }}
         />
-        <BubblesBackground />
+        {/* <BubblesBackground /> - Removed component */}
         <div className="relative z-10 text-center">
           <div className="text-xl font-semibold text-white mb-4">Game not found</div>
           <div className="text-sm text-white opacity-70">Redirecting to game list...</div>

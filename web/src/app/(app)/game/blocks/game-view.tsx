@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { GAME } from "@/types/game";
 import { gamecolors } from "@/lib/game-theme";
 import { formatPlayerName, formatDisplayName } from "@/lib/player-utils";
-import BubblesBackground from "@/components/bubbles-background";
+// import BubblesBackground from "@/components/bubbles-background"; // Removed - component not found
 import Lottie from "lottie-react";
 import { ChevronLeft } from "lucide-react";
 import { UPDATE_GAME_STATE, LOG_GAME_EVENT, UPDATE_PLAYER_STATS, UPDATE_FINAL_GAME_STATS, ADVANCE_TOURNAMENT_AFTER_GAME } from "../actions";
@@ -1721,7 +1721,7 @@ export function GAME_VIEW({ game, onEndGame }: GAME_VIEW_PROPS) {
             background: `linear-gradient(135deg, ${gamecolors.dark}, ${gamecolors.main})`,
           }}
         />
-        <BubblesBackground />
+        {/* <BubblesBackground /> - Removed component */}
         <div className="relative z-10 text-center">
           <div className="text-xl font-semibold text-white mb-4">Loading game...</div>
           <div className="text-sm text-white opacity-70">
@@ -1765,7 +1765,7 @@ export function GAME_VIEW({ game, onEndGame }: GAME_VIEW_PROPS) {
             background: `linear-gradient(135deg, ${gamecolors.dark}, ${gamecolors.main})`,
           }}
         />
-        <BubblesBackground />
+        {/* <BubblesBackground /> - Removed component */}
 
         {/* Animated background effects */}
         <div className="absolute inset-0 z-0 opacity-30">
@@ -1873,7 +1873,7 @@ export function GAME_VIEW({ game, onEndGame }: GAME_VIEW_PROPS) {
           background: `linear-gradient(135deg, ${gamecolors.dark}, ${gamecolors.main})`,
         }}
       />
-      <BubblesBackground />
+      {/* <BubblesBackground /> - Removed component */}
 
       {/* Animated background effects */}
       <div className="absolute inset-0 z-0 opacity-30">

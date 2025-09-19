@@ -172,7 +172,7 @@ export function LeagueBoxes({ leagueId }: LeagueBoxesProps) {
           <Users className="w-8 h-8 text-gray-400" />
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">No boxes found</h3>
-        <p className="text-gray-600">The league hasn't been started yet or boxes haven't been created.</p>
+        <p className="text-gray-600">The league hasn&apos;t been started yet or boxes haven&apos;t been created.</p>
       </div>
     );
   }

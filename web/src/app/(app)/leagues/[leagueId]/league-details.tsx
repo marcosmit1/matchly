@@ -333,7 +333,7 @@ export function LeagueDetails({ leagueId }: { leagueId: string }) {
           <Trophy className="w-8 h-8 text-gray-400" />
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">League not found</h3>
-        <p className="text-gray-600">The league you're looking for doesn't exist or you don't have access to it.</p>
+        <p className="text-gray-600">The league you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it.</p>
       </div>
     );
   }

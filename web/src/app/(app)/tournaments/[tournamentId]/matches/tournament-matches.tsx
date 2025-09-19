@@ -531,7 +531,7 @@ export function TournamentMatches({ tournament, rounds, matches }: TournamentMat
                     <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
                       <div className="text-center mb-4">
                         <p className="text-sm text-gray-600">
-                          Enter Team 1's score - Team 2's score will be automatically calculated
+                          Enter Team 1&apos;s score - Team 2&apos;s score will be automatically calculated
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
                           Total points: {tournament.points_to_win || 21}
