@@ -68,7 +68,7 @@ interface TournamentMatchesProps {
 export function TournamentMatches({ tournament, rounds, matches }: TournamentMatchesProps) {
   const [selectedRound, setSelectedRound] = useState<number>(1);
   const [editingMatch, setEditingMatch] = useState<string | null>(null);
-  const [scores, setScores] = useState<{[key: string]: {p1: number, p2: number, p3: number, p4: number}}>({});
+  const [scores, setScores] = useState<{[key: string]: {p1: number | string, p2: number | string, p3: number | string, p4: number | string}}>({});
   const [matchesData, setMatchesData] = useState<Match[]>(matches);
   const [showSuccess, setShowSuccess] = useState(false);
   const [savingMatch, setSavingMatch] = useState<string | null>(null);
