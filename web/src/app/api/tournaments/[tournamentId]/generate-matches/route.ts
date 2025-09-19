@@ -39,7 +39,7 @@ export async function POST(
     // Get the current round number
     const { data: rounds, error: roundsError } = await supabase
       .from("tournament_rounds")
-      .select("round_number")
+      .select("id, round_number")
       .eq("tournament_id", tournamentId)
       .order("round_number", { ascending: false })
       .limit(1);
