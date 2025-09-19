@@ -146,9 +146,6 @@ export function CreateLeagueForm() {
         throw new Error(result.error || 'Failed to create league');
       }
 
-      console.log('League creation response:', result);
-      console.log('League object:', result.league);
-      console.log('League ID:', result.league?.id);
 
       // Show success modal
       setCreatedLeague(result.league);
@@ -212,18 +209,11 @@ export function CreateLeagueForm() {
   };
 
   const closeSuccess = () => {
-    console.log('closeSuccess called');
-    console.log('createdLeague:', createdLeague);
-    console.log('createdLeague.id:', createdLeague?.id);
-    console.log('createdLeague.id type:', typeof createdLeague?.id);
-    
     setShowSuccess(false);
     if (createdLeague?.id) {
       const leagueId = createdLeague.id;
-      console.log('Navigating to league:', leagueId);
       window.location.href = `/leagues/${leagueId}`;
     } else {
-      console.log('No league ID, navigating to leagues list');
       window.location.href = '/leagues';
     }
     setCreatedLeague(null);

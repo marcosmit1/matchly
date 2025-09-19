@@ -71,7 +71,6 @@ export async function POST(request: NextRequest) {
     // Get the created league details
     // data is a JSON object with {id, invite_code, invite_link}
     const leagueId = data.id;
-    console.log("Created league ID:", leagueId, "Type:", typeof leagueId);
     
     const { data: league, error: leagueError } = await supabase
       .from("leagues")
@@ -166,7 +165,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log("Raw leagues from database:", leagues);
 
     // Get unique creator IDs
     const creatorIds = [...new Set(leagues?.map(league => league.created_by) || [])];
@@ -177,7 +175,6 @@ export async function GET(request: NextRequest) {
       .select("id, username")
       .in("id", creatorIds);
 
-    console.log("Creators fetched:", creators);
 
     // Create a map of creator_id to username
     const creatorMap = new Map(creators?.map(creator => [creator.id, creator.username]) || []);
@@ -197,7 +194,6 @@ export async function GET(request: NextRequest) {
         league_participants: undefined // Remove the raw data
       };
 
-      console.log("Processed league:", processedLeague);
       return processedLeague;
     });
 

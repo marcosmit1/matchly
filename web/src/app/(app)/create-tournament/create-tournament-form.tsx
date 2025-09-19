@@ -21,12 +21,12 @@ export function CreateTournamentForm() {
     name: "",
     description: "",
     sport: "padel",
-    maxPlayers: 8,
+    maxPlayers: 8 as number | string,
     startDate: null as Date | null,
     location: "",
-    numberOfCourts: 2,
+    numberOfCourts: 2 as number | string,
     tournamentType: "mexicano" as "mexicano" | "americano",
-    pointsToWin: 21,
+    pointsToWin: 21 as number | string,
   });
 
   const [players, setPlayers] = useState<TournamentPlayer[]>([]);
@@ -88,6 +88,9 @@ export function CreateTournamentForm() {
         },
         body: JSON.stringify({
           ...formData,
+          max_players: typeof formData.maxPlayers === 'string' && formData.maxPlayers === '' ? 8 : formData.maxPlayers,
+          number_of_courts: typeof formData.numberOfCourts === 'string' && formData.numberOfCourts === '' ? 2 : formData.numberOfCourts,
+          points_to_win: typeof formData.pointsToWin === 'string' && formData.pointsToWin === '' ? 21 : formData.pointsToWin,
           start_date: formData.startDate ? formData.startDate.toISOString().split('T')[0] : null,
           players: players,
         }),
@@ -186,7 +189,17 @@ export function CreateTournamentForm() {
                   type="number"
                   placeholder="Enter max players"
                   value={formData.maxPlayers || ""}
-                  onChange={(e) => handleInputChange("maxPlayers", parseInt(e.target.value) || 8)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "") {
+                      handleInputChange("maxPlayers", "");
+                    } else {
+                      const numValue = parseInt(value);
+                      if (!isNaN(numValue)) {
+                        handleInputChange("maxPlayers", numValue);
+                      }
+                    }
+                  }}
                   className="pl-10 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
                   min="4"
                   max="32"
@@ -255,7 +268,17 @@ export function CreateTournamentForm() {
                   type="number"
                   placeholder="2"
                   value={formData.numberOfCourts || ""}
-                  onChange={(e) => handleInputChange("numberOfCourts", parseInt(e.target.value) || 2)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "") {
+                      handleInputChange("numberOfCourts", "");
+                    } else {
+                      const numValue = parseInt(value);
+                      if (!isNaN(numValue)) {
+                        handleInputChange("numberOfCourts", numValue);
+                      }
+                    }
+                  }}
                   className="pl-10 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
                   min="1"
                   max="8"
@@ -294,7 +317,17 @@ export function CreateTournamentForm() {
                   type="number"
                   placeholder="21"
                   value={formData.pointsToWin || ""}
-                  onChange={(e) => handleInputChange("pointsToWin", parseInt(e.target.value) || 21)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "") {
+                      handleInputChange("pointsToWin", "");
+                    } else {
+                      const numValue = parseInt(value);
+                      if (!isNaN(numValue)) {
+                        handleInputChange("pointsToWin", numValue);
+                      }
+                    }
+                  }}
                   className="pl-10 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
                   min="11"
                   max="50"

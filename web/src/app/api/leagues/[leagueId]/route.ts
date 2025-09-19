@@ -17,8 +17,6 @@ export async function GET(
 
     const { leagueId } = await params;
     
-    // Debug logging
-    console.log("League ID received:", leagueId, "Type:", typeof leagueId);
     
     // Validate leagueId
     if (!leagueId || typeof leagueId !== 'string') {

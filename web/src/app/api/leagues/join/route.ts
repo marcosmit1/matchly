@@ -15,7 +15,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('Joining league with invite code:', invite_code);
 
     // Find league by invite code
     const { data: league, error: leagueError } = await supabase
@@ -29,7 +28,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid invite code or league is not open' }, { status: 400 });
     }
 
-    console.log('Found league:', league.name);
 
     // Check if user is already a participant
     const { data: existingParticipant, error: participantError } = await supabase
@@ -74,7 +72,6 @@ export async function POST(request: NextRequest) {
       // Don't fail the request, just log the error
     }
 
-    console.log('Successfully joined league:', league.name);
 
     return NextResponse.json({
       success: true,

@@ -34,10 +34,10 @@ export function MatchesList() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [scoreForm, setScoreForm] = useState({
-    player1_score: 0,
-    player2_score: 0,
-    sets_to_win: 3,
-    points_to_win: 11,
+    player1_score: 0 as number | string,
+    player2_score: 0 as number | string,
+    sets_to_win: 3 as number | string,
+    points_to_win: 11 as number | string,
   });
 
   useEffect(() => {
@@ -291,7 +291,17 @@ export function MatchesList() {
                   <Input
                     type="number"
                     value={scoreForm.player1_score}
-                    onChange={(e) => setScoreForm(prev => ({ ...prev, player1_score: parseInt(e.target.value) || 0 }))}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === "") {
+                        setScoreForm(prev => ({ ...prev, player1_score: "" }));
+                      } else {
+                        const numValue = parseInt(value);
+                        if (!isNaN(numValue)) {
+                          setScoreForm(prev => ({ ...prev, player1_score: numValue }));
+                        }
+                      }
+                    }}
                     className="w-full h-10 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     min="0"
                   />
@@ -303,7 +313,17 @@ export function MatchesList() {
                   <Input
                     type="number"
                     value={scoreForm.player2_score}
-                    onChange={(e) => setScoreForm(prev => ({ ...prev, player2_score: parseInt(e.target.value) || 0 }))}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === "") {
+                        setScoreForm(prev => ({ ...prev, player2_score: "" }));
+                      } else {
+                        const numValue = parseInt(value);
+                        if (!isNaN(numValue)) {
+                          setScoreForm(prev => ({ ...prev, player2_score: numValue }));
+                        }
+                      }
+                    }}
                     className="w-full h-10 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     min="0"
                   />
@@ -318,7 +338,17 @@ export function MatchesList() {
                   <Input
                     type="number"
                     value={scoreForm.sets_to_win}
-                    onChange={(e) => setScoreForm(prev => ({ ...prev, sets_to_win: parseInt(e.target.value) || 3 }))}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === "") {
+                        setScoreForm(prev => ({ ...prev, sets_to_win: "" }));
+                      } else {
+                        const numValue = parseInt(value);
+                        if (!isNaN(numValue)) {
+                          setScoreForm(prev => ({ ...prev, sets_to_win: numValue }));
+                        }
+                      }
+                    }}
                     className="w-full h-10 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     min="1"
                     max="5"
@@ -331,7 +361,17 @@ export function MatchesList() {
                   <Input
                     type="number"
                     value={scoreForm.points_to_win}
-                    onChange={(e) => setScoreForm(prev => ({ ...prev, points_to_win: parseInt(e.target.value) || 11 }))}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === "") {
+                        setScoreForm(prev => ({ ...prev, points_to_win: "" }));
+                      } else {
+                        const numValue = parseInt(value);
+                        if (!isNaN(numValue)) {
+                          setScoreForm(prev => ({ ...prev, points_to_win: numValue }));
+                        }
+                      }
+                    }}
                     className="w-full h-10 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     min="1"
                     max="21"

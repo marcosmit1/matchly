@@ -10,7 +10,6 @@ export default async function GamePage() {
     data: { user: authUser },
   } = await supabase.auth.getUser();
 
-  console.log("Auth user:", authUser);
 
   if (!authUser) {
     redirect("/login");
@@ -29,7 +28,6 @@ export default async function GamePage() {
     redirect("/login");
   }
 
-  console.log("User data from database:", userdata);
 
   return <NEW_GAME_ROOT user={userdata} />;
 }
