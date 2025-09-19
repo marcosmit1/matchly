@@ -57,11 +57,11 @@ export async function GET(
       guest_player_id: participant.guest_player_id,
       name: participant.user_id 
         ? ((participant.users as any)?.raw_user_meta_data?.username || (participant.users as any)?.email)
-        : participant.guest_players?.name,
+        : (participant.guest_players as any)?.name,
       email: participant.user_id 
         ? (participant.users as any)?.email
-        : participant.guest_players?.email,
-      phone: participant.guest_players?.phone,
+        : (participant.guest_players as any)?.email,
+      phone: (participant.guest_players as any)?.phone,
       status: participant.status,
       is_guest: !!participant.guest_player_id,
       joined_at: participant.joined_at
