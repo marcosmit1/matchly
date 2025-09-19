@@ -10,7 +10,7 @@ interface TournamentPageProps {
 
 export default async function TournamentPage({ params }: TournamentPageProps) {
   const supabase = await createClient();
-  const { tournamentId } = params;
+  const { tournamentId } = await params;
 
   // Fetch tournament details
   const { data: tournament, error } = await supabase

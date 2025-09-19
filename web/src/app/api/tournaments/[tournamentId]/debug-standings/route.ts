@@ -3,11 +3,11 @@ import { createClient } from '@/supabase/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { tournamentId: string } }
+  { params }: { params: Promise<{ tournamentId: string }> }
 ) {
   try {
     const supabase = await createClient();
-    const { tournamentId } = params;
+    const { tournamentId } = await params;
 
     console.log('Debug: Tournament ID:', tournamentId);
 

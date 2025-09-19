@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { tournamentId: string; matchId: string } }
+  { params }: { params: Promise<{ tournamentId: string; matchId: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -15,7 +15,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { tournamentId, matchId } = params;
+    const { tournamentId, matchId } = await params;
     const body = await request.json();
     const { player1_score, player2_score, player3_score, player4_score } = body;
 

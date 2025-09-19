@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { tournamentId: string } }
+  { params }: { params: Promise<{ tournamentId: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -15,7 +15,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { tournamentId } = params;
+    const { tournamentId } = await params;
 
     // Verify the user has permission to advance rounds
     const { data: tournament, error: tournamentError } = await supabase
@@ -65,7 +65,7 @@ export async function POST(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { tournamentId: string } }
+  { params }: { params: Promise<{ tournamentId: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -77,7 +77,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { tournamentId } = params;
+    const { tournamentId } = await params;
     const { searchParams } = new URL(request.url);
     const roundNumber = parseInt(searchParams.get("round") || "1");
 
