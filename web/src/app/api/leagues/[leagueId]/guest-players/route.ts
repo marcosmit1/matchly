@@ -56,10 +56,10 @@ export async function GET(
       user_id: participant.user_id,
       guest_player_id: participant.guest_player_id,
       name: participant.user_id 
-        ? (Array.isArray(participant.users) ? participant.users[0]?.raw_user_meta_data?.username || participant.users[0]?.email : participant.users?.raw_user_meta_data?.username || participant.users?.email)
+        ? ((participant.users as any)?.raw_user_meta_data?.username || (participant.users as any)?.email)
         : participant.guest_players?.name,
       email: participant.user_id 
-        ? (Array.isArray(participant.users) ? participant.users[0]?.email : participant.users?.email)
+        ? (participant.users as any)?.email
         : participant.guest_players?.email,
       phone: participant.guest_players?.phone,
       status: participant.status,
