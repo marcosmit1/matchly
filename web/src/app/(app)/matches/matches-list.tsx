@@ -20,8 +20,6 @@ interface Match {
   sets_to_win: number;
   points_to_win: number;
   current_set: number;
-  player1_id: string;
-  player2_id: string;
   box: {
     id: string;
     box_number: number;
