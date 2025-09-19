@@ -3,9 +3,9 @@ import { notFound } from "next/navigation";
 import { TournamentDetails } from "./tournament-details";
 
 interface TournamentPageProps {
-  params: {
+  params: Promise<{
     tournamentId: string;
-  };
+  }>;
 }
 
 export default async function TournamentPage({ params }: TournamentPageProps) {
