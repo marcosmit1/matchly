@@ -96,7 +96,7 @@ export function CreateLeagueForm() {
     name: "",
     description: "",
     sport: "",
-    maxPlayers: 8,
+    maxPlayers: 8 as number | string,
     startDate: null as Date | null,
     location: "",
     entryFee: 0,
@@ -130,7 +130,7 @@ export function CreateLeagueForm() {
         },
         body: JSON.stringify({
           ...formData,
-          max_players: formData.maxPlayers, // Convert camelCase to snake_case
+          max_players: typeof formData.maxPlayers === 'string' && formData.maxPlayers === '' ? 8 : formData.maxPlayers, // Convert camelCase to snake_case
           start_date: formData.startDate ? formData.startDate.toISOString().split('T')[0] : null,
           entry_fee: hasEntryFee ? formData.entryFee : 0,
           prize_pool: hasPrizePool ? formData.prizePool : 0,
@@ -316,7 +316,17 @@ export function CreateLeagueForm() {
               type="number"
               placeholder="Enter max players"
               value={formData.maxPlayers || ""}
-              onChange={(e) => handleInputChange("maxPlayers", parseInt(e.target.value) || 8)}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === "") {
+                  handleInputChange("maxPlayers", "");
+                } else {
+                  const numValue = parseInt(value);
+                  if (!isNaN(numValue)) {
+                    handleInputChange("maxPlayers", numValue);
+                  }
+                }
+              }}
               className="pl-3 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
               min="4"
               max="32"
