@@ -42,12 +42,12 @@ export function CreateTournamentForm() {
 
   const addPlayer = () => {
     if (!newPlayer.name.trim()) {
-      showToast("Please enter a player name", "error");
+      showToast({ type: "error", title: "Please enter a player name" });
       return;
     }
 
     if (players.length >= formData.maxPlayers) {
-      showToast(`Maximum ${formData.maxPlayers} players allowed`, "error");
+      showToast({ type: "error", title: `Maximum ${formData.maxPlayers} players allowed` });
       return;
     }
 
@@ -70,12 +70,12 @@ export function CreateTournamentForm() {
     e.preventDefault();
     
     if (players.length < 4) {
-      showToast("Tournament needs at least 4 players", "error");
+      showToast({ type: "error", title: "Tournament needs at least 4 players" });
       return;
     }
 
     if (!formData.name.trim()) {
-      showToast("Please enter a tournament name", "error");
+      showToast({ type: "error", title: "Please enter a tournament name" });
       return;
     }
 
@@ -96,15 +96,15 @@ export function CreateTournamentForm() {
       const data = await response.json();
 
       if (response.ok) {
-        showToast("Tournament created successfully!", "success");
+        showToast({ type: "success", title: "Tournament created successfully!" });
         // Redirect to tournament details
         window.location.href = `/tournaments/${data.tournament.id}`;
       } else {
-        showToast(data.error || "Failed to create tournament", "error");
+        showToast({ type: "error", title: data.error || "Failed to create tournament" });
       }
     } catch (error) {
       console.error("Error creating tournament:", error);
-      showToast("Failed to create tournament", "error");
+      showToast({ type: "error", title: "Failed to create tournament" });
     } finally {
       setLoading(false);
     }

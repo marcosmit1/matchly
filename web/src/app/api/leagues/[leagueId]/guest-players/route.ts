@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 // GET: Fetch all guest players for a league
 export async function GET(
   request: NextRequest,
-  { params }: { params: { leagueId: string } }
+  { params }: { params: Promise<{ leagueId: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -16,7 +16,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { leagueId } = params;
+    const { leagueId } = await params;
 
     // Get all participants including guests
     const { data: participants, error } = await supabase
@@ -83,7 +83,7 @@ export async function GET(
 // POST: Add a guest player to a league
 export async function POST(
   request: NextRequest,
-  { params }: { params: { leagueId: string } }
+  { params }: { params: Promise<{ leagueId: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -95,7 +95,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { leagueId } = params;
+    const { leagueId } = await params;
     const body = await request.json();
     const { name, email, phone } = body;
 
@@ -140,7 +140,7 @@ export async function POST(
 // DELETE: Remove a guest player from a league
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { leagueId: string } }
+  { params }: { params: Promise<{ leagueId: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -152,7 +152,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { leagueId } = params;
+    const { leagueId } = await params;
     const { searchParams } = new URL(request.url);
     const guestPlayerId = searchParams.get("guestPlayerId");
 
