@@ -91,7 +91,7 @@ export default async function Page() {
       <SplashScreen />
       <PlaytomicHome 
         username={username}
-        userStats={data?.stats}
+        userStats={data?.stats || null}
         timeString={timeString}
         dateString={dateString}
       />
