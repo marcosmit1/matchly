@@ -266,12 +266,12 @@ export function TournamentMatches({ tournament, rounds, matches }: TournamentMat
       // Auto-calculate the other team's score
       if (player === 'p1' && numValue !== '') {
         // If Team 1 score is entered, calculate Team 2 score
-        const team1Score = parseInt(numValue) || 0;
+        const team1Score = typeof numValue === 'number' ? numValue : parseInt(numValue) || 0;
         const team2Score = Math.max(0, pointsToWin - team1Score);
         currentScores.p3 = team2Score;
       } else if (player === 'p3' && numValue !== '') {
         // If Team 2 score is entered, calculate Team 1 score
-        const team2Score = parseInt(numValue) || 0;
+        const team2Score = typeof numValue === 'number' ? numValue : parseInt(numValue) || 0;
         const team1Score = Math.max(0, pointsToWin - team2Score);
         currentScores.p1 = team1Score;
       }
