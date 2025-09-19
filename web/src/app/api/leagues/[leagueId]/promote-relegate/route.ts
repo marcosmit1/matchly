@@ -84,7 +84,7 @@ export async function POST(
         for (const player of top2) {
           promotions.push({
             user_id: player.user_id,
-            username: player.users.username,
+            username: (player.users as any).username,
             from_box: currentBox.name,
             to_box: higherBox.name,
             from_level: currentBox.level,
@@ -101,7 +101,7 @@ export async function POST(
         for (const player of bottom2) {
           relegations.push({
             user_id: player.user_id,
-            username: player.users.username,
+            username: (player.users as any).username,
             from_box: currentBox.name,
             to_box: lowerBox.name,
             from_level: currentBox.level,
