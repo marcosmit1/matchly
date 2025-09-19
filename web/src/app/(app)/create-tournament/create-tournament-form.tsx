@@ -46,8 +46,9 @@ export function CreateTournamentForm() {
       return;
     }
 
-    if (players.length >= formData.maxPlayers) {
-      showToast({ type: "error", title: `Maximum ${formData.maxPlayers} players allowed` });
+    const maxPlayers = typeof formData.maxPlayers === 'string' && formData.maxPlayers === '' ? 8 : Number(formData.maxPlayers);
+    if (players.length >= maxPlayers) {
+      showToast({ type: "error", title: `Maximum ${maxPlayers} players allowed` });
       return;
     }
 
@@ -355,7 +356,7 @@ export function CreateTournamentForm() {
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
             <Users className="w-5 h-5 text-blue-600" />
-            <span>Players ({players.length}/{formData.maxPlayers})</span>
+            <span>Players ({players.length}/{typeof formData.maxPlayers === 'string' && formData.maxPlayers === '' ? 8 : formData.maxPlayers})</span>
           </h2>
           
           {/* Add Player Form */}
@@ -404,7 +405,7 @@ export function CreateTournamentForm() {
                 <Button
                   type="button"
                   onClick={addPlayer}
-                  disabled={!newPlayer.name.trim() || players.length >= formData.maxPlayers}
+                  disabled={!newPlayer.name.trim() || players.length >= (typeof formData.maxPlayers === 'string' && formData.maxPlayers === '' ? 8 : Number(formData.maxPlayers))}
                   className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2"
                 >
                   <Plus className="w-4 h-4" />
