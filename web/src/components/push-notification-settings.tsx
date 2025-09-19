@@ -111,8 +111,8 @@ export function PUSH_NOTIFICATION_SETTINGS({ user }: PUSH_NOTIFICATION_SETTINGS_
 
   if (!hasChecked) {
     return (
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-5" style={{ backdropFilter: "blur(8px)" as any }}>
-        <div className="flex items-center gap-2 text-white/70 text-sm mb-3">
+      <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+        <div className="flex items-center gap-2 text-gray-600 text-sm">
           <Loader2 className="h-4 w-4 animate-spin" />
           Checking notification settings...
         </div>
@@ -121,16 +121,16 @@ export function PUSH_NOTIFICATION_SETTINGS({ user }: PUSH_NOTIFICATION_SETTINGS_
   }
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-5" style={{ backdropFilter: "blur(8px)" as any }}>
-      <div className="text-white/70 text-sm mb-3">Push Notifications</div>
+    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+      <div className="text-gray-700 text-sm mb-3 font-medium">Push Notifications</div>
 
       {/* Browser Support Check */}
       {!isSupported && (
         <div className="flex items-start gap-3 mb-4">
-          <AlertCircle className="h-4 w-4 text-red-400 flex-shrink-0 mt-0.5" />
+          <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
           <div>
-            <div className="text-red-400 text-sm font-medium">Not Supported</div>
-            <div className="text-white/60 text-xs mt-1">
+            <div className="text-red-600 text-sm font-medium">Not Supported</div>
+            <div className="text-gray-600 text-xs mt-1">
               Push notifications are not supported in this browser. Please use Chrome, Firefox, or Safari.
             </div>
           </div>
@@ -141,13 +141,13 @@ export function PUSH_NOTIFICATION_SETTINGS({ user }: PUSH_NOTIFICATION_SETTINGS_
       {isSupported && permissionStatus && (
         <div className="flex items-start gap-3 mb-4">
           {permissionStatus === "granted" ? (
-            <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0 mt-0.5" />
+            <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
           ) : (
-            <AlertCircle className="h-4 w-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+            <AlertCircle className="h-4 w-4 text-yellow-500 flex-shrink-0 mt-0.5" />
           )}
           <div>
-            <div className="text-white text-sm font-medium">Browser Permission</div>
-            <div className="text-white/60 text-xs mt-1">
+            <div className="text-gray-900 text-sm font-medium">Browser Permission</div>
+            <div className="text-gray-600 text-xs mt-1">
               {permissionStatus === "granted"
                 ? "Browser notifications are allowed"
                 : permissionStatus === "denied"
@@ -162,12 +162,12 @@ export function PUSH_NOTIFICATION_SETTINGS({ user }: PUSH_NOTIFICATION_SETTINGS_
       {isSupported && user?.id && (
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            {isSubscribed ? <Bell className="h-4 w-4 text-green-400" /> : <BellOff className="h-4 w-4 text-white/40" />}
+            {isSubscribed ? <Bell className="h-4 w-4 text-green-500" /> : <BellOff className="h-4 w-4 text-gray-400" />}
             <div>
-              <div className="text-white text-sm font-medium">
+              <div className="text-gray-900 text-sm font-medium">
                 {isSubscribed ? "Notifications Enabled" : "Enable Notifications"}
               </div>
-              <div className="text-white/60 text-xs mt-1">
+              <div className="text-gray-600 text-xs mt-1">
                 {isSubscribed
                   ? "You will receive push notifications when the app is closed"
                   : "Enable to receive push notifications when the app is closed"}
@@ -181,8 +181,8 @@ export function PUSH_NOTIFICATION_SETTINGS({ user }: PUSH_NOTIFICATION_SETTINGS_
               h-9 px-4 rounded-xl font-semibold text-sm disabled:opacity-50 transition-all
               ${
                 isSubscribed
-                  ? "bg-white/10 border border-white/10 text-white hover:bg-white/20"
-                  : "bg-[#FAD659] text-black hover:bg-[#FAD659]/90"
+                  ? "bg-gray-200 border border-gray-300 text-gray-700 hover:bg-gray-300"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
               }
             `}
           >
@@ -194,18 +194,18 @@ export function PUSH_NOTIFICATION_SETTINGS({ user }: PUSH_NOTIFICATION_SETTINGS_
       {/* Not Logged In */}
       {!user?.id && (
         <div className="flex items-start gap-3">
-          <AlertCircle className="h-4 w-4 text-white/40 flex-shrink-0 mt-0.5" />
+          <AlertCircle className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
           <div>
-            <div className="text-white/60 text-sm font-medium">Account Required</div>
-            <div className="text-white/40 text-xs mt-1">Please log in to manage push notification settings.</div>
+            <div className="text-gray-600 text-sm font-medium">Account Required</div>
+            <div className="text-gray-500 text-xs mt-1">Please log in to manage push notification settings.</div>
           </div>
         </div>
       )}
 
       {/* Status Message */}
       {message && (
-        <div className="mt-4 p-3 rounded-xl bg-white/5 border border-white/10">
-          <div className="text-white/80 text-sm">{message}</div>
+        <div className="mt-4 p-3 rounded-xl bg-blue-50 border border-blue-200">
+          <div className="text-blue-800 text-sm">{message}</div>
         </div>
       )}
     </div>
