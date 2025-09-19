@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { NEW_GAME_VIEW } from "./new-game-view";
 import { USER } from "@/types/game";
-import { Zap, Trophy, ArrowLeft, Calendar, Racket } from "lucide-react";
+import { Zap, Trophy, ArrowLeft, Calendar, Target } from "lucide-react";
 
 type Mode = null | "quick" | "tournament" | "booking";
 
