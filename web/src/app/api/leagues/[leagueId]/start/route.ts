@@ -357,7 +357,7 @@ async function createBoxesAndAssignPlayers(
 
     // Assign players to this box
     const startIndex = boxNumber === 1 ? 0 : boxConfig.boxSizes ? 
-      boxConfig.boxSizes.slice(0, boxNumber - 1).reduce((sum, size) => sum + size, 0) :
+      boxConfig.boxSizes.slice(0, boxNumber - 1).reduce((sum: number, size: number) => sum + size, 0) :
       (boxNumber - 1) * players_per_box;
     const endIndex = startIndex + playersInThisBox;
     const boxPlayers = shuffledParticipants.slice(startIndex, endIndex);
