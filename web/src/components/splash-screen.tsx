@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./splash-screen.module.css";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 export default function SplashScreen({ force = false }: { force?: boolean }) {
   const [show, setShow] = useState(true);
@@ -55,15 +56,7 @@ export default function SplashScreen({ force = false }: { force?: boolean }) {
         <div ref={logoRef} className={styles["logo-container"]}>
           <div className={styles.glow} />
           <div className={styles.logo}>
-            <div className={styles.trophy}>
-              <div className={styles.trophyCup}>
-                <div className={styles.trophyHandles}>
-                  <div className={styles.handle}></div>
-                  <div className={styles.handle}></div>
-                </div>
-                <div className={styles.trophyTop}></div>
-              </div>
-            </div>
+            <LoadingSpinner size="lg" color="blue" />
           </div>
         </div>
         <p ref={textRef} className={styles["loading-text"]}>
