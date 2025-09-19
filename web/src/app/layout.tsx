@@ -28,6 +28,9 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Matchly" />
         <meta name="format-detection" content="telephone=no" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/icon-192x192.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/icon-192x192.png" />
+        <link rel="shortcut icon" href="/app-logo.png" />
       </head>
       <body
         className={geist.className}

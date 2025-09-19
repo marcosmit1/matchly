@@ -212,8 +212,12 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">M</span>
+          <div className="w-20 h-20 mx-auto mb-4">
+            <img 
+              src="/app-logo.png" 
+              alt="Matchly" 
+              className="w-full h-full object-contain"
+            />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Matchly</h1>
           <p className="text-gray-600">Welcome to the ultimate tournament companion</p>

@@ -95,8 +95,12 @@ export function PlaytomicHome({ username, userStats, timeString, dateString }: P
       <div className="bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">M</span>
+            <div className="w-8 h-8 flex items-center justify-center">
+              <img 
+                src="/app-logo.png" 
+                alt="Matchly" 
+                className="w-full h-full object-contain"
+              />
             </div>
             <div>
               <h1 className="text-lg font-semibold text-gray-900">Matchly</h1>

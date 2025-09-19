@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./splash-screen.module.css";
-import { LoadingSpinner } from "@/components/loading-spinner";
 
 export default function SplashScreen({ force = false }: { force?: boolean }) {
   const [show, setShow] = useState(true);
@@ -56,11 +55,15 @@ export default function SplashScreen({ force = false }: { force?: boolean }) {
         <div ref={logoRef} className={styles["logo-container"]}>
           <div className={styles.glow} />
           <div className={styles.logo}>
-            <LoadingSpinner size="lg" color="blue" />
+            <img 
+              src="/app-logo.png" 
+              alt="Matchly" 
+              className="w-24 h-24 object-contain animate-pulse"
+            />
           </div>
         </div>
         <p ref={textRef} className={styles["loading-text"]}>
-          Preparing Tournament...
+          Welcome to Matchly...
         </p>
       </div>
     </div>
