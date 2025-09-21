@@ -108,7 +108,7 @@ export function LeaguesList() {
           <p className="text-gray-600">Manage your created and joined leagues</p>
         </div>
         <Link href="/create-league">
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-4 py-2 flex items-center space-x-2">
+          <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-2xl px-4 py-2 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300">
             <Plus className="w-4 h-4" />
             <span>Create League</span>
           </Button>
@@ -185,7 +185,7 @@ export function LeaguesList() {
               : "Be the first to create a league!"}
           </p>
           <Link href="/create-league">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-6 py-2">
+            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-2xl px-6 py-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300">
               Create League
             </Button>
           </Link>
