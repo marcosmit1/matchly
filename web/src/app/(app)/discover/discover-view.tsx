@@ -133,14 +133,29 @@ export function DiscoverView() {
               <label className="block text-sm font-medium text-white/90 mb-2">
                 Invite Code
               </label>
+              {/* Debug display */}
+              <div className="text-xs text-white/60 mb-2">
+                Debug: Current value: &quot;{inviteCode}&quot; (Length: {inviteCode.length})
+              </div>
               <input
                 type="text"
                 placeholder="Enter 5-digit code"
                 value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
-                className="w-full px-4 py-3 text-center font-mono text-lg tracking-wider bg-white/10 border border-white/30 rounded-xl text-white placeholder:text-white/60 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:outline-none transition-all duration-300"
+                onChange={(e) => {
+                  console.log('Input changed:', e.target.value);
+                  setInviteCode(e.target.value.replace(/\D/g, '').slice(0, 5));
+                }}
+                className="w-full px-4 py-3 text-center font-mono text-lg tracking-wider bg-white/20 border-2 border-white/40 rounded-xl text-white placeholder:text-white/60 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:outline-none transition-all duration-300 relative z-10"
                 maxLength={5}
                 autoFocus
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  border: '2px solid rgba(255, 255, 255, 0.4)',
+                  color: 'white',
+                  fontSize: '18px',
+                  fontWeight: '500',
+                  letterSpacing: '0.1em'
+                }}
               />
             </div>
             
