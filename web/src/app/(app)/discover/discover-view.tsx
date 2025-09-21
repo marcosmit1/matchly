@@ -196,7 +196,7 @@ export function DiscoverView() {
           </p>
         </div>
       ) : (
-        <div className="space-y-12">
+        <div className="grid gap-4">
           {filteredLeagues.map((league) => (
             <Link key={league.id} href={`/leagues/${league.id}`}>
               <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
