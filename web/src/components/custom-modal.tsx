@@ -7,8 +7,9 @@ export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
-  message: string;
-  type?: "success" | "error" | "warning" | "info" | "confirm";
+  message?: string;
+  content?: React.ReactNode;
+  type?: "success" | "error" | "warning" | "info" | "confirm" | "custom";
   confirmText?: string;
   cancelText?: string;
   onConfirm?: () => void;
@@ -21,6 +22,7 @@ export function CustomModal({
   onClose,
   title,
   message,
+  content,
   type = "info",
   confirmText = "OK",
   cancelText = "Cancel",
@@ -59,6 +61,8 @@ export function CustomModal({
         return <AlertTriangle className="w-8 h-8 text-yellow-400" />;
       case "confirm":
         return <AlertTriangle className="w-8 h-8 text-blue-400" />;
+      case "custom":
+        return null; // No icon for custom content
       default:
         return <Info className="w-8 h-8 text-blue-400" />;
     }
@@ -76,6 +80,8 @@ export function CustomModal({
         return "Warning";
       case "confirm":
         return "Confirm Action";
+      case "custom":
+        return "Information";
       default:
         return "Information";
     }
@@ -121,37 +127,43 @@ export function CustomModal({
             )}
           </div>
 
-          {/* Message */}
+          {/* Message or Content */}
           <div className="mb-6">
-            <p className="text-white/80 text-base leading-relaxed">{message}</p>
+            {content ? (
+              <div className="text-white/80">{content}</div>
+            ) : (
+              <p className="text-white/80 text-base leading-relaxed">{message}</p>
+            )}
           </div>
 
           {/* Actions */}
-          <div className="flex space-x-3">
-            {type === "confirm" ? (
-              <>
-                <button
-                  onClick={handleCancel}
-                  className="flex-1 px-4 py-3 border border-white/30 text-white/80 rounded-2xl hover:bg-white/10 transition-all duration-300 backdrop-blur-md font-medium"
-                >
-                  {cancelText}
-                </button>
+          {type !== "custom" && (
+            <div className="flex space-x-3">
+              {type === "confirm" ? (
+                <>
+                  <button
+                    onClick={handleCancel}
+                    className="flex-1 px-4 py-3 border border-white/30 text-white/80 rounded-2xl hover:bg-white/10 transition-all duration-300 backdrop-blur-md font-medium"
+                  >
+                    {cancelText}
+                  </button>
+                  <button
+                    onClick={handleConfirm}
+                    className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
+                  >
+                    {confirmText}
+                  </button>
+                </>
+              ) : (
                 <button
                   onClick={handleConfirm}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
+                  className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
                 >
                   {confirmText}
                 </button>
-              </>
-            ) : (
-              <button
-                onClick={handleConfirm}
-                className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
-              >
-                {confirmText}
-              </button>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

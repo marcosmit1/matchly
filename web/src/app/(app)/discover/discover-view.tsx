@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/blocks/button';
 import { Input } from '@/blocks/input';
 import { showToast } from '@/components/toast';
+import { useModal } from '@/contexts/modal-context';
 
 interface League {
   id: string;
@@ -53,6 +54,7 @@ export function DiscoverView() {
   const [typeFilter, setTypeFilter] = useState<'all' | 'leagues' | 'tournaments'>('all');
   const [inviteCode, setInviteCode] = useState('');
   const [joining, setJoining] = useState(false);
+  const { showModal } = useModal();
 
   useEffect(() => {
     fetchPublicData();
@@ -109,6 +111,50 @@ export function DiscoverView() {
       case 'completed': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const showJoinCodeModal = () => {
+    showModal({
+      title: "Join with Invite Code",
+      type: "custom",
+      content: (
+        <div className="space-y-4">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto bg-gradient-to-r from-green-500 to-blue-500 rounded-2xl flex items-center justify-center mb-4">
+              <Hash className="w-8 h-8 text-white" />
+            </div>
+            <p className="text-white/80 mb-6">
+              Enter the 5-digit invite code to join a tournament or league
+            </p>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-white/90 mb-2">
+                Invite Code
+              </label>
+              <Input
+                type="text"
+                placeholder="Enter 5-digit code"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                className="w-full text-center font-mono text-lg tracking-wider bg-white/10 border-white/30 text-white placeholder:text-white/60"
+                maxLength={5}
+              />
+            </div>
+            
+            <Button
+              onClick={handleJoinWithCode}
+              disabled={joining || inviteCode.length !== 5}
+              className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 text-white py-3 rounded-xl"
+            >
+              {joining ? 'Joining...' : 'Join'}
+            </Button>
+          </div>
+        </div>
+      ),
+      showCloseButton: true,
+    });
   };
 
   const handleJoinWithCode = async () => {
@@ -181,30 +227,6 @@ export function DiscoverView() {
           />
         </div>
 
-        {/* Join with Invite Code */}
-        <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-4">
-          <div className="flex items-center space-x-2 mb-3">
-            <Hash className="w-5 h-5 text-green-600" />
-            <h3 className="text-sm font-semibold text-gray-900">Join with Invite Code</h3>
-          </div>
-          <div className="flex space-x-2">
-            <Input
-              type="text"
-              placeholder="Enter 5-digit code"
-              value={inviteCode}
-              onChange={(e) => setInviteCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
-              className="flex-1 text-center font-mono text-lg tracking-wider"
-              maxLength={5}
-            />
-            <Button
-              onClick={handleJoinWithCode}
-              disabled={joining || inviteCode.length !== 5}
-              className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 text-white px-6"
-            >
-              {joining ? 'Joining...' : 'Join'}
-            </Button>
-          </div>
-        </div>
 
         <div className="flex space-x-2 overflow-x-auto pb-2">
           {['all', 'squash', 'padel', 'tennis', 'badminton'].map((sport) => (
@@ -244,8 +266,8 @@ export function DiscoverView() {
         </div>
       </div>
 
-      {/* Create Buttons */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Action Buttons */}
+      <div className="grid grid-cols-3 gap-3">
         <Link href="/create-league">
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl p-4 flex items-center justify-center space-x-2 hover:shadow-md transition-all">
             <Trophy className="w-5 h-5" />
@@ -258,6 +280,13 @@ export function DiscoverView() {
             <span className="font-medium">Create Tournament</span>
           </div>
         </Link>
+        <button
+          onClick={() => showJoinCodeModal()}
+          className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white rounded-xl p-4 flex items-center justify-center space-x-2 hover:shadow-md transition-all"
+        >
+          <Hash className="w-5 h-5" />
+          <span className="font-medium">Join with Code</span>
+        </button>
       </div>
 
       {/* Content List */}
