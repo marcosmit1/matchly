@@ -473,20 +473,20 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
 
             {/* Invite Code Display */}
             {tournament.invite_code && (
-              <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10 rounded-3xl"></div>
+              <div className="bg-gray-50 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-gray-200 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-transparent to-gray-200 rounded-3xl"></div>
                 <div className="relative z-10">
                   <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-lg border border-white/20">
-                      <Hash className="w-5 h-5 text-white/90" />
+                    <div className="w-10 h-10 bg-gray-200 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-lg border border-gray-300">
+                      <Hash className="w-5 h-5 text-gray-700" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">Invite Code</h3>
-                      <p className="text-white/70 text-sm">Share this 5-digit code for easy joining</p>
+                      <h3 className="text-lg font-bold text-gray-900">Invite Code</h3>
+                      <p className="text-gray-600 text-sm">Share this 5-digit code for easy joining</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <div className="flex-1 bg-white/90 backdrop-blur-md border border-gray-200 rounded-2xl px-4 py-3 text-center shadow-inner">
+                    <div className="flex-1 bg-white backdrop-blur-md border border-gray-200 rounded-2xl px-4 py-3 text-center shadow-inner">
                       <span className="font-mono text-2xl font-bold text-gray-900 tracking-wider">
                         {tournament.invite_code}
                       </span>
@@ -504,6 +504,7 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
                 </div>
               </div>
             )}
+
             
             {/* Player Actions */}
             {(!currentUser || currentUser.id !== tournament.created_by) && (
