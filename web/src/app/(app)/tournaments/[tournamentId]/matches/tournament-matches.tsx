@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useModal } from "@/contexts/modal-context";
 import { 
   ArrowLeft, 
   Play, 
@@ -70,12 +71,13 @@ export function TournamentMatches({ tournament, rounds, matches }: TournamentMat
   const [editingMatch, setEditingMatch] = useState<string | null>(null);
   const [scores, setScores] = useState<{[key: string]: {p1: number | string, p2: number | string, p3: number | string, p4: number | string}}>({});
   const [matchesData, setMatchesData] = useState<Match[]>(matches);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [showSuccessState, setShowSuccessState] = useState(false);
   const [savingMatch, setSavingMatch] = useState<string | null>(null);
   const [roundCompletion, setRoundCompletion] = useState<any>(null);
   const [advancingRound, setAdvancingRound] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [finalRankings, setFinalRankings] = useState<PlayerRanking[]>([]);
+  const { showConfirm, showSuccess, showError } = useModal();
   const [loadingRankings, setLoadingRankings] = useState(false);
 
   useEffect(() => {
@@ -217,7 +219,12 @@ export function TournamentMatches({ tournament, rounds, matches }: TournamentMat
   };
 
   const generateMatches = async () => {
-    if (!confirm('Generate matches for the current round? This will create match pairings.')) {
+    const confirmed = await showConfirm(
+      'Generate matches for the current round? This will create match pairings.',
+      'Generate Matches'
+    );
+    
+    if (!confirmed) {
       return;
     }
 
@@ -233,20 +240,20 @@ export function TournamentMatches({ tournament, rounds, matches }: TournamentMat
       const data = await response.json();
 
       if (data.success) {
-        alert('Matches generated successfully!');
+        await showSuccess('Matches generated successfully!');
         // Refresh the page to show updated matches
         window.location.reload();
       } else {
         // Handle the case where matches already exist
         if (data.existingMatches) {
-          alert(`Matches already exist for this round (${data.existingMatches} matches found).`);
+          await showError(`Matches already exist for this round (${data.existingMatches} matches found).`);
         } else {
-          alert(`Failed to generate matches: ${data.error || data.message}`);
+          await showError(`Failed to generate matches: ${data.error || data.message}`);
         }
       }
     } catch (error) {
       console.error('Error generating matches:', error);
-      alert('Failed to generate matches. Please try again.');
+      await showError('Failed to generate matches. Please try again.');
     } finally {
       setGenerating(false);
     }
@@ -345,14 +352,14 @@ export function TournamentMatches({ tournament, rounds, matches }: TournamentMat
         });
         
         // Show success toast
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
+        setShowSuccessState(true);
+        setTimeout(() => setShowSuccessState(false), 3000);
       } else {
-        alert(`Failed to save scores: ${data.error}`);
+        await showError(`Failed to save scores: ${data.error}`);
       }
     } catch (error) {
       console.error('Error saving scores:', error);
-      alert('Failed to save scores. Please try again.');
+      await showError('Failed to save scores. Please try again.');
     } finally {
       setSavingMatch(null);
     }
@@ -361,7 +368,7 @@ export function TournamentMatches({ tournament, rounds, matches }: TournamentMat
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Success Toast */}
-      {showSuccess && (
+      {showSuccessState && (
         <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 transform transition-all duration-300 ease-in-out animate-in slide-in-from-right">
           <CheckCircle className="w-5 h-5" />
           <span className="font-medium">Scores saved successfully!</span>

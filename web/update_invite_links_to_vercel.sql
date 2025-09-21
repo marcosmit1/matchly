@@ -65,7 +65,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 UPDATE leagues 
 SET invite_link = 'https://matchly-jet.vercel.app/join/' || invite_code
 WHERE invite_link LIKE 'https://matchly.app/join/%' 
-   OR invite_link LIKE 'https://tournamator.app/join/%';
+   OR invite_link LIKE 'https://matchly-jet.vercel.app/join/%';
 
 -- Show the updated leagues
 SELECT id, name, invite_code, invite_link 

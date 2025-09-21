@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
+import { ModalProvider } from "@/contexts/modal-context";
 
 const geist = Geist({ subsets: ["latin"] });
 
@@ -38,7 +39,9 @@ export default async function RootLayout({
           minHeight: "100dvh",
         }}
       >
-        <main className="app-content">{children}</main>
+        <ModalProvider>
+          <main className="app-content">{children}</main>
+        </ModalProvider>
       </body>
     </html>
   );

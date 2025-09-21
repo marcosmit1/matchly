@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useModal } from "@/contexts/modal-context";
 import { 
   ArrowLeft, 
   Users, 
@@ -49,6 +50,7 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
   const [finalRankings, setFinalRankings] = useState<any[]>([]);
   const [loadingRankings, setLoadingRankings] = useState(false);
   const [playoffsComplete, setPlayoffsComplete] = useState(false);
+  const { showConfirm, showSuccess, showError } = useModal();
 
   useEffect(() => {
     fetchParticipants();
@@ -194,7 +196,12 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
   };
 
   const startTournament = async () => {
-    if (!confirm('Are you sure you want to start this tournament? This action cannot be undone.')) {
+    const confirmed = await showConfirm(
+      'Are you sure you want to start this tournament? This action cannot be undone.',
+      'Start Tournament'
+    );
+    
+    if (!confirmed) {
       return;
     }
 
@@ -210,23 +217,28 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
       const data = await response.json();
 
       if (data.success) {
-        alert('Tournament started successfully!');
+        await showSuccess('Tournament started successfully!');
         // Refresh rounds data and reload page
         await fetchRounds();
         window.location.reload();
       } else {
-        alert(`Failed to start tournament: ${data.error}`);
+        await showError(`Failed to start tournament: ${data.error}`);
       }
     } catch (error) {
       console.error('Error starting tournament:', error);
-      alert('Failed to start tournament. Please try again.');
+      await showError('Failed to start tournament. Please try again.');
     } finally {
       setStarting(false);
     }
   };
 
   const generateMatches = async () => {
-    if (!confirm('Generate matches for the current round? This will create match pairings.')) {
+    const confirmed = await showConfirm(
+      'Generate matches for the current round? This will create match pairings.',
+      'Generate Matches'
+    );
+    
+    if (!confirmed) {
       return;
     }
 
@@ -242,20 +254,20 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
       const data = await response.json();
 
       if (data.success) {
-        alert('Matches generated successfully!');
+        await showSuccess('Matches generated successfully!');
         // Refresh the page to show updated matches
         window.location.reload();
       } else {
         // Handle the case where matches already exist
         if (data.existingMatches) {
-          alert(`Matches already exist for this round (${data.existingMatches} matches found). Please go to "View Matches" to see them.`);
+          await showError(`Matches already exist for this round (${data.existingMatches} matches found). Please go to "View Matches" to see them.`);
         } else {
-          alert(`Failed to generate matches: ${data.error || data.message}`);
+          await showError(`Failed to generate matches: ${data.error || data.message}`);
         }
       }
     } catch (error) {
       console.error('Error generating matches:', error);
-      alert('Failed to generate matches. Please try again.');
+      await showError('Failed to generate matches. Please try again.');
     } finally {
       setGenerating(false);
     }

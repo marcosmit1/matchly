@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/blocks/button";
 import { Trophy, Users, Calendar, MapPin, Play, Settings, Target, Eye } from "lucide-react";
 import Link from "next/link";
+import { useModal } from "@/contexts/modal-context";
 
 interface League {
   id: string;
@@ -27,6 +28,7 @@ interface League {
 export function MyLeaguesList() {
   const [leagues, setLeagues] = useState<League[]>([]);
   const [loading, setLoading] = useState(true);
+  const { showConfirm, showSuccess, showError } = useModal();
 
   useEffect(() => {
     fetchMyLeagues();
@@ -84,7 +86,12 @@ export function MyLeaguesList() {
   };
 
   const startLeague = async (leagueId: string) => {
-    if (!confirm("Are you sure you want to start this league? This will create boxes and matches.")) {
+    const confirmed = await showConfirm(
+      "Are you sure you want to start this league? This will create boxes and matches.",
+      "Start League"
+    );
+    
+    if (!confirmed) {
       return;
     }
 
@@ -96,14 +103,14 @@ export function MyLeaguesList() {
       const result = await response.json();
 
       if (response.ok) {
-        alert('League started successfully! Boxes and matches have been created.');
+        await showSuccess('League started successfully! Boxes and matches have been created.');
         fetchMyLeagues(); // Refresh the list
       } else {
-        alert(result.error || 'Failed to start league');
+        await showError(result.error || 'Failed to start league');
       }
     } catch (error) {
       console.error('Error starting league:', error);
-      alert('Failed to start league');
+      await showError('Failed to start league');
     }
   };
 

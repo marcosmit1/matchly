@@ -5,6 +5,7 @@ import { Button } from "@/blocks/button";
 import { Trophy, Users, Calendar, MapPin, Copy, Share, Play, Settings, Target, Clock } from "lucide-react";
 import { showToast } from "@/components/toast";
 import { GuestPlayerManager } from "@/components/guest-player-manager";
+import { useModal } from "@/contexts/modal-context";
 
 interface League {
   id: string;
@@ -41,6 +42,7 @@ export function LeagueDetails({ leagueId }: { leagueId: string }) {
   const [loading, setLoading] = useState(true);
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const { showConfirm, showSuccess, showError } = useModal();
   const [showSettings, setShowSettings] = useState(false);
   const [addingTestPlayers, setAddingTestPlayers] = useState(false);
   const [generatingMatches, setGeneratingMatches] = useState(false);
@@ -170,7 +172,12 @@ export function LeagueDetails({ leagueId }: { leagueId: string }) {
   };
 
   const startLeague = async () => {
-    if (!confirm("Are you sure you want to start this league? This will create boxes and matches.")) {
+    const confirmed = await showConfirm(
+      "Are you sure you want to start this league? This will create boxes and matches.",
+      "Start League"
+    );
+    
+    if (!confirmed) {
       return;
     }
 
@@ -183,14 +190,14 @@ export function LeagueDetails({ leagueId }: { leagueId: string }) {
       const result = await response.json();
 
       if (response.ok) {
-        alert('League started successfully! Boxes and matches have been created.');
+        await showSuccess('League started successfully! Boxes and matches have been created.');
         fetchLeagueDetails(); // Refresh league data
       } else {
-        alert(result.error || 'Failed to start league');
+        await showError(result.error || 'Failed to start league');
       }
     } catch (error) {
       console.error('Error starting league:', error);
-      alert('Failed to start league');
+      await showError('Failed to start league');
     }
   };
 
