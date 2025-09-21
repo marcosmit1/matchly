@@ -208,23 +208,35 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center px-4 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+      </div>
+      
+      <div className="w-full max-w-md relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 mx-auto mb-4">
-            <img 
-              src="/app-logo.png" 
-              alt="Matchly" 
-              className="w-full h-full object-contain"
-            />
+          <div className="relative mb-6">
+            <div className="w-24 h-24 mx-auto bg-white rounded-3xl shadow-2xl flex items-center justify-center p-4 transform hover:scale-105 transition-transform duration-300">
+              <img 
+                src="/app-logo.png" 
+                alt="Matchly" 
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="absolute inset-0 w-24 h-24 mx-auto bg-gradient-to-r from-blue-400 to-purple-500 rounded-3xl blur-lg opacity-30 -z-10"></div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Matchly</h1>
-          <p className="text-gray-600">Welcome to the ultimate tournament companion</p>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
+            Matchly
+          </h1>
+          <p className="text-gray-600 text-lg">Welcome to the ultimate tournament companion</p>
         </div>
 
         {/* Form Container */}
-        <div className="bg-white rounded-2xl shadow-sm p-6 space-y-6">
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 space-y-6">
           {authState === 'email' && (
             // Email input phase
             <>
@@ -236,14 +248,14 @@ export default function LoginPage() {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setemail(e.target.value)}
-                    className="pl-10 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="pl-12 w-full h-14 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 bg-white/50 backdrop-blur-sm transition-all duration-300"
                     autoCapitalize="none"
                     required
                   />
                 </div>
                 <Button
                   onClick={HANDLE_EMAIL_SUBMIT}
-                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium"
+                  className="w-full h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
                   disabled={isloading}
                 >
                   {isloading ? (
@@ -278,7 +290,7 @@ export default function LoginPage() {
               
               <Button
                 onClick={HANDLE_I_VERIFIED_EMAIL}
-                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium"
+                className="w-full h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
                 disabled={isloading}
               >
                 {isloading ? (
@@ -288,10 +300,10 @@ export default function LoginPage() {
                 )}
               </Button>
               
-              <Button 
-                onClick={HANDLE_BACK_TO_EMAIL} 
-                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-              >
+                <Button 
+                  onClick={HANDLE_BACK_TO_EMAIL} 
+                  className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors duration-200"
+                >
                 ← Back to email
               </Button>
             </>
@@ -320,7 +332,7 @@ export default function LoginPage() {
                     placeholder="Enter 6-digit code"
                     value={otp}
                     onChange={(e) => setotp(e.target.value)}
-                    className="pl-10 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-lg tracking-widest"
+                    className="pl-12 w-full h-14 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 bg-white/50 backdrop-blur-sm text-center text-lg tracking-widest transition-all duration-300"
                     maxLength={6}
                     required
                   />
@@ -328,7 +340,7 @@ export default function LoginPage() {
                 
                 <Button
                   onClick={HANDLE_VERIFY_CODE}
-                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium"
+                  className="w-full h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
                   disabled={isloading}
                 >
                   {isloading ? (
@@ -340,7 +352,7 @@ export default function LoginPage() {
                 
                 <Button 
                   onClick={HANDLE_BACK_TO_EMAIL} 
-                  className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                  className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors duration-200"
                 >
                   ← Back to email
                 </Button>
@@ -359,7 +371,7 @@ export default function LoginPage() {
         <div className="mt-6">
           <Button
             onClick={HANDLE_GOOGLE_SIGN_IN}
-            className="w-full h-12 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-xl font-medium flex items-center justify-center space-x-2"
+            className="w-full h-14 bg-white/80 hover:bg-white text-gray-700 border-2 border-gray-200 hover:border-gray-300 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center space-x-3 backdrop-blur-sm"
             disabled={isloading}
           >
             <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
