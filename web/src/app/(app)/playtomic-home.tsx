@@ -90,12 +90,12 @@ export function PlaytomicHome({ username, userStats, timeString, dateString }: P
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-20">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="bg-white/80 backdrop-blur-sm border-b border-white/20 px-4 py-4 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 flex items-center justify-center">
+            <div className="w-10 h-10 bg-white rounded-2xl shadow-lg flex items-center justify-center p-2">
               <img 
                 src="/app-logo.png" 
                 alt="Matchly" 
@@ -103,15 +103,17 @@ export function PlaytomicHome({ username, userStats, timeString, dateString }: P
               />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">Matchly</h1>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Matchly</h1>
             </div>
           </div>
-          <div className="flex items-center space-x-3">
-            <Search className="w-5 h-5 text-gray-600" />
-            <div className="relative">
+          <div className="flex items-center space-x-4">
+            <div className="p-2 rounded-xl bg-white/50 hover:bg-white/80 transition-colors duration-200">
+              <Search className="w-5 h-5 text-gray-600" />
+            </div>
+            <div className="relative p-2 rounded-xl bg-white/50 hover:bg-white/80 transition-colors duration-200">
               <Bell className="w-5 h-5 text-gray-600" />
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs font-medium">20</span>
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-white text-xs font-bold">20</span>
               </div>
             </div>
           </div>
@@ -121,40 +123,40 @@ export function PlaytomicHome({ username, userStats, timeString, dateString }: P
       {/* Main Content */}
       <div className="px-4 py-6 space-y-6">
         {/* Welcome Section */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back, {username}</h2>
           <p className="text-gray-600 text-sm">{timeString} • {dateString}</p>
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-4">
           <Link href="/leagues">
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-4 flex items-center justify-center space-x-2">
+            <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-2xl py-4 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300">
               <Trophy className="w-5 h-5" />
-              <span className="font-medium">Browse Leagues</span>
+              <span className="font-semibold">Browse Leagues</span>
             </Button>
           </Link>
           <Link href="/create-league">
-            <Button className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-xl py-4 flex items-center justify-center space-x-2">
+            <Button className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 rounded-2xl py-4 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300">
               <Plus className="w-5 h-5" />
-              <span className="font-medium">Create League</span>
+              <span className="font-semibold">Create League</span>
             </Button>
           </Link>
         </div>
 
         {/* Tournament Actions */}
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1 gap-4">
           <Link href="/create-tournament">
-            <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-xl py-4 flex items-center justify-center space-x-2">
+            <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-2xl py-4 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300">
               <Target className="w-5 h-5" />
-              <span className="font-medium">Create Tournament</span>
+              <span className="font-semibold">Create Tournament</span>
             </Button>
           </Link>
         </div>
 
         {/* Stats Overview */}
         {userStats && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
+          <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Stats</h3>
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
@@ -174,7 +176,7 @@ export function PlaytomicHome({ username, userStats, timeString, dateString }: P
         )}
 
         {/* Recent Activity */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
           {loadingActivity ? (
             <div className="text-center py-8">
@@ -192,7 +194,7 @@ export function PlaytomicHome({ username, userStats, timeString, dateString }: P
             <div className="space-y-3">
               {recentActivity.map((activity) => (
                 <Link key={`${activity.type}-${activity.id}`} href={`/${activity.type}s/${activity.id}`}>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div className="flex items-center justify-between p-4 bg-white/50 backdrop-blur-sm rounded-2xl hover:bg-white/80 transition-all duration-300 border border-white/20 shadow-sm hover:shadow-md">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                         {activity.type === 'league' ? (
