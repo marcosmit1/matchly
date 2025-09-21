@@ -219,15 +219,15 @@ export default function LoginPage() {
       <div className="w-full max-w-md relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="relative mb-6">
-            <div className="w-24 h-24 mx-auto bg-white rounded-3xl shadow-2xl flex items-center justify-center p-4 transform hover:scale-105 transition-transform duration-300">
+          <div className="relative mb-8">
+            <div className="w-40 h-40 mx-auto bg-white/20 backdrop-blur-md rounded-3xl shadow-2xl border border-white/30 flex items-center justify-center p-6 transform hover:scale-105 transition-all duration-300">
               <img 
                 src="/app-logo.png" 
                 alt="Matchly" 
-                className="w-full h-full object-contain"
+                className="w-24 h-24 object-contain"
               />
             </div>
-            <div className="absolute inset-0 w-24 h-24 mx-auto bg-gradient-to-r from-blue-400 to-purple-500 rounded-3xl blur-lg opacity-30 -z-10"></div>
+            <div className="absolute inset-0 w-40 h-40 mx-auto bg-gradient-to-r from-blue-400 to-purple-500 rounded-3xl blur-xl opacity-40 -z-10 animate-pulse"></div>
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
             Matchly
@@ -236,19 +236,22 @@ export default function LoginPage() {
         </div>
 
         {/* Form Container */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 space-y-6">
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 space-y-6 relative overflow-hidden">
+          {/* Liquid glass effect overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10 rounded-3xl"></div>
+          <div className="relative z-10">
           {authState === 'email' && (
             // Email input phase
             <>
               <div className="space-y-4">
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/70" />
                   <Input
                     type="email"
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setemail(e.target.value)}
-                    className="pl-12 w-full h-14 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 bg-white/50 backdrop-blur-sm transition-all duration-300"
+                    className="pl-12 w-full h-14 border border-white/30 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 bg-white/10 backdrop-blur-md transition-all duration-300 text-white placeholder:text-white/70"
                     autoCapitalize="none"
                     required
                   />
@@ -326,13 +329,13 @@ export default function LoginPage() {
               
               <div className="space-y-4">
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/70" />
                   <Input
                     type="text"
                     placeholder="Enter 6-digit code"
                     value={otp}
                     onChange={(e) => setotp(e.target.value)}
-                    className="pl-12 w-full h-14 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 bg-white/50 backdrop-blur-sm text-center text-lg tracking-widest transition-all duration-300"
+                    className="pl-12 w-full h-14 border border-white/30 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 bg-white/10 backdrop-blur-md text-center text-lg tracking-widest transition-all duration-300 text-white placeholder:text-white/70"
                     maxLength={6}
                     required
                   />
@@ -359,6 +362,7 @@ export default function LoginPage() {
               </div>
             </>
           )}
+          </div>
         </div>
 
         {error && (
@@ -371,7 +375,7 @@ export default function LoginPage() {
         <div className="mt-6">
           <Button
             onClick={HANDLE_GOOGLE_SIGN_IN}
-            className="w-full h-14 bg-white/80 hover:bg-white text-gray-700 border-2 border-gray-200 hover:border-gray-300 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center space-x-3 backdrop-blur-sm"
+            className="w-full h-14 bg-white/10 hover:bg-white/20 text-white border border-white/30 hover:border-white/50 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center space-x-3 backdrop-blur-md"
             disabled={isloading}
           >
             <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
