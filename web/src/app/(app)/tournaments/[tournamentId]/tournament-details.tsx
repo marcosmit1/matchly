@@ -485,8 +485,8 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <div className="flex-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-3 text-center">
-                      <span className="font-mono text-2xl font-bold text-white tracking-wider">
+                    <div className="flex-1 bg-white/90 backdrop-blur-md border border-gray-200 rounded-2xl px-4 py-3 text-center shadow-inner">
+                      <span className="font-mono text-2xl font-bold text-gray-900 tracking-wider">
                         {tournament.invite_code}
                       </span>
                     </div>
