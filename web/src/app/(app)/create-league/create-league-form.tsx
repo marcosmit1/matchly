@@ -5,8 +5,7 @@ import { Button } from "@/blocks/button";
 import { Input } from "@/blocks/input";
 import { Trophy, Users, Calendar, MapPin, Target, Copy, Share, Check } from "lucide-react";
 import { LoadingSpinner } from "@/components/loading-spinner";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { BetterDatePicker } from "@/components/better-date-picker";
 
 // Custom styles for the date picker
 const customDatePickerStyles = `
@@ -255,7 +254,6 @@ export function CreateLeagueForm() {
 
   return (
     <div className="space-y-6">
-      <style dangerouslySetInnerHTML={{ __html: customDatePickerStyles }} />
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">League Details</h2>
         <p className="text-gray-600">Fill in the details for your {SPORTS.find(s => s.id === formData.sport)?.name} league</p>
@@ -330,21 +328,12 @@ export function CreateLeagueForm() {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Start Date (Optional)
           </label>
-          <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
-            <DatePicker
-              selected={formData.startDate}
-              onChange={(date) => handleInputChange("startDate", date)}
-              placeholderText="Select start date"
-              dateFormat="dd/MM/yyyy"
-              minDate={new Date()}
-              wrapperClassName="w-full relative z-50"
-              showPopperArrow={false}
-              isClearable
-              autoComplete="off"
-              popperClassName="z-50"
-            />
-          </div>
+          <BetterDatePicker
+            value={formData.startDate}
+            onChange={(date) => handleInputChange("startDate", date)}
+            placeholder="Select start date"
+            className="w-full"
+          />
           <p className="text-xs text-gray-500 mt-1">Leave empty if start date is flexible</p>
         </div>
 

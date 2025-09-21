@@ -12,10 +12,14 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@heroui/calendar": "^2.2.24",
     "@heroui/date-picker": "^2.3.25",
     "@heroui/react": "^2.8.2",
     "@internationalized/date": "^3.9.0",
+    "@mui/material": "^7.3.2",
+    "@mui/x-date-pickers": "^8.11.3",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-slot": "^1.2.3",
     "@stripe/stripe-js": "^7.9.0",
@@ -24,6 +28,7 @@
     "@types/react-datepicker": "^6.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dayjs": "^1.11.18",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.525.0",
     "next": "15.4.1",

@@ -1,13 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/blocks/button";
 import { Input } from "@/blocks/input";
-import { Trophy, Users, Calendar, MapPin, Target, Plus, Trash2, User } from "lucide-react";
+import { Trophy, Users, Calendar, MapPin, Target, Plus, Trash2 } from "lucide-react";
 import { showToast } from "@/components/toast";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { createClient } from "@/supabase/client";
+import { BetterDatePicker } from "@/components/better-date-picker";
 
 interface TournamentPlayer {
   id: string;
@@ -18,8 +16,6 @@ interface TournamentPlayer {
 
 export function CreateTournamentForm() {
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [userProfile, setUserProfile] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -39,24 +35,6 @@ export function CreateTournamentForm() {
     phone: "",
   });
 
-  // Fetch current user data
-  useEffect(() => {
-    const fetchUser = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUser(user);
-        // Fetch user profile
-        const { data: profile } = await supabase
-          .from("users")
-          .select("username, first_name, last_name, email")
-          .eq("id", user.id)
-          .single();
-        setUserProfile(profile);
-      }
-    };
-    fetchUser();
-  }, []);
 
   const handleInputChange = (field: string, value: string | number | Date | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -89,36 +67,6 @@ export function CreateTournamentForm() {
     setPlayers(prev => prev.filter(p => p.id !== playerId));
   };
 
-  const addCurrentUser = () => {
-    if (!user || !userProfile) return;
-    
-    const maxPlayers = typeof formData.maxPlayers === 'string' && formData.maxPlayers === '' ? 8 : Number(formData.maxPlayers);
-    if (players.length >= maxPlayers) {
-      showToast({ type: "error", title: `Maximum ${maxPlayers} players allowed` });
-      return;
-    }
-
-    // Check if user is already added
-    const userAlreadyAdded = players.some(p => p.email === user.email);
-    if (userAlreadyAdded) {
-      showToast({ type: "error", title: "You are already added to this tournament" });
-      return;
-    }
-
-    const displayName = userProfile.username || 
-                       (userProfile.first_name && userProfile.last_name ? `${userProfile.first_name} ${userProfile.last_name}` : null) ||
-                       userProfile.email?.split('@')[0] || 
-                       "You";
-
-    const currentUserPlayer: TournamentPlayer = {
-      id: `user-${user.id}`,
-      name: displayName,
-      email: user.email,
-    };
-
-    setPlayers(prev => [...prev, currentUserPlayer]);
-    showToast({ type: "success", title: "Added yourself to the tournament" });
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -265,22 +213,12 @@ export function CreateTournamentForm() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Start Date
               </label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <DatePicker
-                  selected={formData.startDate}
-                  onChange={(date) => handleInputChange("startDate", date)}
-                  placeholderText="Select start date"
-                  dateFormat="dd/MM/yyyy"
-                  minDate={new Date()}
-                  className="pl-10 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
-                  wrapperClassName="w-full relative z-50"
-                  showPopperArrow={false}
-                  isClearable
-                  autoComplete="off"
-                  popperClassName="z-50"
-                />
-              </div>
+              <BetterDatePicker
+                value={formData.startDate}
+                onChange={(date) => handleInputChange("startDate", date)}
+                placeholder="Select start date"
+                className="w-full"
+              />
             </div>
 
             {/* Location */}
@@ -408,8 +346,11 @@ export function CreateTournamentForm() {
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
             <Users className="w-5 h-5 text-blue-600" />
-            <span>Players ({players.length}/{typeof formData.maxPlayers === 'string' && formData.maxPlayers === '' ? 8 : formData.maxPlayers})</span>
+            <span>Players (Optional) ({players.length}/{typeof formData.maxPlayers === 'string' && formData.maxPlayers === '' ? 8 : formData.maxPlayers})</span>
           </h2>
+          <p className="text-sm text-gray-600 mb-4">
+            You can add players now or share the tournament link later for others to join.
+          </p>
           
           {/* Add Player Form */}
           <div className="mb-4 p-4 bg-gray-50 rounded-lg">
@@ -419,7 +360,7 @@ export function CreateTournamentForm() {
                   Name *
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
                     type="text"
                     placeholder="Player name"
@@ -453,24 +394,15 @@ export function CreateTournamentForm() {
                   className="w-full pl-3 h-10 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
                 />
               </div>
-              <div className="flex items-end space-x-2">
-                <Button
-                  type="button"
-                  onClick={addCurrentUser}
-                  disabled={!user || !userProfile || players.some(p => p.email === user?.email) || players.length >= (typeof formData.maxPlayers === 'string' && formData.maxPlayers === '' ? 8 : Number(formData.maxPlayers))}
-                  className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2"
-                >
-                  <User className="w-4 h-4" />
-                  <span>Add Me</span>
-                </Button>
+              <div className="flex items-end">
                 <Button
                   type="button"
                   onClick={addPlayer}
                   disabled={!newPlayer.name.trim() || players.length >= (typeof formData.maxPlayers === 'string' && formData.maxPlayers === '' ? 8 : Number(formData.maxPlayers))}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2"
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Add</span>
+                  <span>Add Player</span>
                 </Button>
               </div>
             </div>
