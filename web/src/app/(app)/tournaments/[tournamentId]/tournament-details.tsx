@@ -473,11 +473,11 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
             {/* Invite Code Display */}
             {tournament.invite_code && (
               <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-blue-500/5 to-purple-500/10 rounded-3xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10 rounded-3xl"></div>
                 <div className="relative z-10">
                   <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
-                      <Hash className="w-5 h-5 text-white" />
+                    <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-lg border border-white/20">
+                      <Hash className="w-5 h-5 text-white/90" />
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-white">Invite Code</h3>
@@ -485,7 +485,7 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <div className="flex-1 bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl px-4 py-3 text-center">
+                    <div className="flex-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-3 text-center">
                       <span className="font-mono text-2xl font-bold text-white tracking-wider">
                         {tournament.invite_code}
                       </span>
@@ -495,7 +495,7 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
                         navigator.clipboard.writeText(tournament.invite_code!);
                         showSuccess('Invite code copied!');
                       }}
-                      className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-4 py-3 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-3 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
                     >
                       <Copy className="w-5 h-5" />
                     </Button>
