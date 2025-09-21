@@ -18,11 +18,25 @@ export function BetterDatePicker({
 }: BetterDatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(value);
+  const [openUpwards, setOpenUpwards] = useState(false);
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
     onChange(date);
     setIsOpen(false);
+  };
+
+  const handleToggle = () => {
+    if (!isOpen) {
+      // Check if there's enough space below the input
+      const rect = document.querySelector(`[data-datepicker="${placeholder}"]`)?.getBoundingClientRect();
+      if (rect) {
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        setOpenUpwards(spaceBelow < 400 && spaceAbove > 400);
+      }
+    }
+    setIsOpen(!isOpen);
   };
 
   const formatDate = (date: Date | null) => {
@@ -93,7 +107,8 @@ export function BetterDatePicker({
     <div className={`relative ${className}`}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleToggle}
+        data-datepicker={placeholder}
         className="w-full h-14 pl-12 pr-4 border border-white/30 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 bg-black/20 backdrop-blur-md transition-all duration-300 text-white placeholder:text-white/80 shadow-inner flex items-center justify-between"
       >
         <div className="flex items-center">
@@ -103,7 +118,9 @@ export function BetterDatePicker({
           </span>
         </div>
         <svg
-          className={`w-5 h-5 text-white/70 transition-transform ${isOpen ? "rotate-180" : ""}`}
+          className={`w-5 h-5 text-white/70 transition-transform ${
+            isOpen ? (openUpwards ? "rotate-0" : "rotate-180") : ""
+          }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -113,7 +130,9 @@ export function BetterDatePicker({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 p-4">
+        <div className={`absolute left-0 right-0 bg-white rounded-2xl shadow-2xl border border-gray-200 z-[9999] p-4 ${
+          openUpwards ? 'bottom-full mb-2' : 'top-full mt-2'
+        }`}>
           <div className="flex items-center justify-between mb-4">
             <button
               type="button"
@@ -197,7 +216,7 @@ export function BetterDatePicker({
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-[9998]"
           onClick={() => setIsOpen(false)}
         />
       )}
