@@ -18,7 +18,7 @@ export function BetterDatePicker({
 }: BetterDatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(value);
-  const [openUpwards, setOpenUpwards] = useState(false);
+  const [openUpwards, setOpenUpwards] = useState(true);
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
@@ -33,7 +33,8 @@ export function BetterDatePicker({
       if (rect) {
         const spaceBelow = window.innerHeight - rect.bottom;
         const spaceAbove = rect.top;
-        setOpenUpwards(spaceBelow < 400 && spaceAbove > 400);
+        // Always open upwards if there's less than 500px below or if we're in the lower half of the screen
+        setOpenUpwards(spaceBelow < 500 || rect.top > window.innerHeight / 2);
       }
     }
     setIsOpen(!isOpen);
@@ -130,7 +131,7 @@ export function BetterDatePicker({
       </button>
 
       {isOpen && (
-        <div className={`absolute left-0 right-0 bg-white rounded-2xl shadow-2xl border border-gray-200 z-[9999] p-4 ${
+        <div className={`absolute left-0 right-0 bg-white rounded-2xl shadow-2xl border border-gray-200 z-[99999] p-4 ${
           openUpwards ? 'bottom-full mb-2' : 'top-full mt-2'
         }`}>
           <div className="flex items-center justify-between mb-4">
@@ -216,7 +217,7 @@ export function BetterDatePicker({
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-[9998]"
+          className="fixed inset-0 z-[99998]"
           onClick={() => setIsOpen(false)}
         />
       )}
