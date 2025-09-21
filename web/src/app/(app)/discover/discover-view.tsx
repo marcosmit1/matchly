@@ -114,6 +114,9 @@ export function DiscoverView() {
   };
 
   const showJoinCodeModal = () => {
+    // Reset invite code when opening modal
+    setInviteCode('');
+    
     showModal({
       title: "Join with Invite Code",
       type: "custom",
@@ -136,11 +139,20 @@ export function DiscoverView() {
               <input
                 type="text"
                 placeholder="Enter 5-digit code"
-                value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                defaultValue=""
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '').slice(0, 5);
+                  setInviteCode(value);
+                  e.target.value = value; // Update the input value directly
+                }}
                 className="w-full px-4 py-3 text-center font-mono text-lg tracking-wider bg-white/20 border-2 border-white/40 rounded-xl text-white placeholder:text-white/60 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:outline-none transition-all duration-300"
                 maxLength={5}
                 autoFocus
+                style={{
+                  color: 'white',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  border: '2px solid rgba(255, 255, 255, 0.4)',
+                }}
               />
             </div>
             
