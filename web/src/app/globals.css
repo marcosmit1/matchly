@@ -516,3 +516,13 @@ body:has([data-vaul-drawer]) .absolute-no-scroll {
   max-height: 100dvh !important;
   overflow: hidden !important;
 }
+
+/* Scrollbar hide utility for horizontal scrolling */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

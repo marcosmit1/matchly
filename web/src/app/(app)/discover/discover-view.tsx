@@ -133,29 +133,14 @@ export function DiscoverView() {
               <label className="block text-sm font-medium text-white/90 mb-2">
                 Invite Code
               </label>
-              {/* Debug display */}
-              <div className="text-xs text-white/60 mb-2">
-                Debug: Current value: &quot;{inviteCode}&quot; (Length: {inviteCode.length})
-              </div>
               <input
                 type="text"
                 placeholder="Enter 5-digit code"
                 value={inviteCode}
-                onChange={(e) => {
-                  console.log('Input changed:', e.target.value);
-                  setInviteCode(e.target.value.replace(/\D/g, '').slice(0, 5));
-                }}
-                className="w-full px-4 py-3 text-center font-mono text-lg tracking-wider bg-white/20 border-2 border-white/40 rounded-xl text-white placeholder:text-white/60 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:outline-none transition-all duration-300 relative z-10"
+                onChange={(e) => setInviteCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                className="w-full px-4 py-3 text-center font-mono text-lg tracking-wider bg-white/20 border-2 border-white/40 rounded-xl text-white placeholder:text-white/60 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:outline-none transition-all duration-300"
                 maxLength={5}
                 autoFocus
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  border: '2px solid rgba(255, 255, 255, 0.4)',
-                  color: 'white',
-                  fontSize: '18px',
-                  fontWeight: '500',
-                  letterSpacing: '0.1em'
-                }}
               />
             </div>
             
@@ -229,7 +214,7 @@ export function DiscoverView() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-6">
       {/* Search and Filter */}
       <div className="space-y-4">
         <div className="relative">
@@ -244,12 +229,12 @@ export function DiscoverView() {
         </div>
 
 
-        <div className="flex space-x-2 overflow-x-auto pb-2">
+        <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
           {['all', 'squash', 'padel', 'tennis', 'badminton'].map((sport) => (
             <button
               key={sport}
               onClick={() => setSportFilter(sport)}
-              className={`px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${
+              className={`px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 flex-shrink-0 ${
                 sportFilter === sport
                   ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -260,7 +245,7 @@ export function DiscoverView() {
           ))}
         </div>
 
-        <div className="flex space-x-2 overflow-x-auto pb-2">
+        <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
           {[
             { key: 'all', label: 'All', icon: '🏆' },
             { key: 'leagues', label: 'Leagues', icon: '🏆' },
@@ -269,7 +254,7 @@ export function DiscoverView() {
             <button
               key={type.key}
               onClick={() => setTypeFilter(type.key as 'all' | 'leagues' | 'tournaments')}
-              className={`px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap flex items-center space-x-1 transition-all duration-300 ${
+              className={`px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap flex items-center space-x-1 transition-all duration-300 flex-shrink-0 ${
                 typeFilter === type.key
                   ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
