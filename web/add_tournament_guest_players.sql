@@ -26,7 +26,7 @@ CREATE POLICY "Users can view guest players in their tournaments" ON public.tour
         created_by = auth.uid() OR
         tournament_id IN (
             SELECT tournament_id FROM public.tournament_players 
-            WHERE user_id = auth.uid()
+            WHERE created_by = auth.uid()
         )
     );
 
@@ -52,11 +52,11 @@ CREATE POLICY "Users can delete guest players they created" ON public.tournament
 ALTER TABLE public.tournament_players
 ADD COLUMN IF NOT EXISTS guest_player_id UUID REFERENCES public.tournament_guest_players(id) ON DELETE CASCADE;
 
--- Add constraint to ensure either user_id or guest_player_id is set, but not both
+-- Add constraint to ensure either created_by or guest_player_id is set, but not both
 ALTER TABLE public.tournament_players
 ADD CONSTRAINT check_tournament_participant_type CHECK (
-    (user_id IS NOT NULL AND guest_player_id IS NULL) OR
-    (user_id IS NULL AND guest_player_id IS NOT NULL)
+    (created_by IS NOT NULL AND guest_player_id IS NULL) OR
+    (created_by IS NULL AND guest_player_id IS NOT NULL)
 );
 
 -- Update tournament_matches to support guest players
