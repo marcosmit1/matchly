@@ -34,12 +34,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (players.length < 4) {
-      return NextResponse.json(
-        { error: "Tournament needs at least 4 players" },
-        { status: 400 }
-      );
-    }
+    // Allow creating tournaments with just the creator initially
+    // Minimum players will be enforced when starting the tournament
 
     if (players.length > maxPlayers) {
       return NextResponse.json(
