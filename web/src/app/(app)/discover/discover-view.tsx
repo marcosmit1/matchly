@@ -119,13 +119,13 @@ export function DiscoverView() {
       {/* Search and Filter */}
       <div className="space-y-4">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/80 w-5 h-5 drop-shadow-lg" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
             placeholder="Search leagues and tournaments..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 border border-white/30 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 bg-black/20 backdrop-blur-md transition-all duration-300 text-white placeholder:text-white/80 shadow-inner"
+            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
@@ -134,10 +134,10 @@ export function DiscoverView() {
             <button
               key={sport}
               onClick={() => setSportFilter(sport)}
-              className={`px-4 py-3 rounded-2xl text-sm font-medium whitespace-nowrap transition-all duration-300 ${
+              className={`px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${
                 sportFilter === sport
                   ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                  : 'bg-white/10 backdrop-blur-md text-white/80 hover:bg-white/20 border border-white/20'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               {sport === 'all' ? 'All Sports' : sport.charAt(0).toUpperCase() + sport.slice(1)}
@@ -154,10 +154,10 @@ export function DiscoverView() {
             <button
               key={type.key}
               onClick={() => setTypeFilter(type.key as 'all' | 'leagues' | 'tournaments')}
-              className={`px-4 py-3 rounded-2xl text-sm font-medium whitespace-nowrap flex items-center space-x-2 transition-all duration-300 ${
+              className={`px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap flex items-center space-x-1 transition-all duration-300 ${
                 typeFilter === type.key
                   ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
-                  : 'bg-white/10 backdrop-blur-md text-white/80 hover:bg-white/20 border border-white/20'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               <span>{type.icon}</span>
@@ -168,27 +168,17 @@ export function DiscoverView() {
       </div>
 
       {/* Create Buttons */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <Link href="/create-league">
-          <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6 hover:bg-white/20 transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10 rounded-3xl"></div>
-            <div className="relative z-10 flex items-center justify-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <Trophy className="w-6 h-6 text-white" />
-              </div>
-              <span className="font-semibold text-white text-lg">Create League</span>
-            </div>
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl p-4 flex items-center justify-center space-x-2 hover:shadow-md transition-all">
+            <Trophy className="w-5 h-5" />
+            <span className="font-medium">Create League</span>
           </div>
         </Link>
         <Link href="/create-tournament">
-          <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6 hover:bg-white/20 transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10 rounded-3xl"></div>
-            <div className="relative z-10 flex items-center justify-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <Target className="w-6 h-6 text-white" />
-              </div>
-              <span className="font-semibold text-white text-lg">Create Tournament</span>
-            </div>
+          <div className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl p-4 flex items-center justify-center space-x-2 hover:shadow-md transition-all">
+            <Target className="w-5 h-5" />
+            <span className="font-medium">Create Tournament</span>
           </div>
         </Link>
       </div>
@@ -196,11 +186,9 @@ export function DiscoverView() {
       {/* Content List */}
       {(filteredLeagues.length === 0 && filteredTournaments.length === 0) ? (
         <div className="text-center py-12">
-          <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg border border-white/20">
-            <Trophy className="w-8 h-8 text-white/80" />
-          </div>
-          <h3 className="text-lg font-medium text-white mb-2">No content found</h3>
-          <p className="text-white/70">
+          <Trophy className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No content found</h3>
+          <p className="text-gray-500">
             {searchTerm || sportFilter !== 'all' || typeFilter !== 'all'
               ? 'Try adjusting your search or filters'
               : 'Be the first to create a league or tournament!'
@@ -211,54 +199,49 @@ export function DiscoverView() {
         <div className="space-y-4">
           {filteredLeagues.map((league) => (
             <Link key={league.id} href={`/leagues/${league.id}`}>
-              <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6 hover:bg-white/20 transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10 rounded-3xl"></div>
-                <div className="relative z-10">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <span className="text-2xl">{getSportIcon(league.sport)}</span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-white text-lg">{league.name}</h3>
-                        <p className="text-sm text-white/70 capitalize">{league.sport} League</p>
-                      </div>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(league.status)}`}>
-                      {league.status}
-                    </span>
-                  </div>
-
-                  {league.description && (
-                    <p className="text-white/80 text-sm mb-4 line-clamp-2">{league.description}</p>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-4 text-sm text-white/70 mb-4">
-                    <div className="flex items-center space-x-2">
-                      <Users className="w-4 h-4" />
-                      <span>{league.current_players}/{league.max_players} players</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="w-4 h-4" />
-                      <span>{new Date(league.start_date).toLocaleDateString()}</span>
+              <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="text-2xl">{getSportIcon(league.sport)}</div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{league.name}</h3>
+                      <p className="text-sm text-gray-600 capitalize">{league.sport} League</p>
                     </div>
                   </div>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(league.status)}`}>
+                    {league.status}
+                  </span>
+                </div>
 
-                  {league.location && (
-                    <div className="flex items-center space-x-2 text-sm text-white/70 mb-4">
-                      <MapPin className="w-4 h-4" />
-                      <span>{league.location}</span>
-                    </div>
-                  )}
+                {league.description && (
+                  <p className="text-gray-700 text-sm mb-3 line-clamp-2">{league.description}</p>
+                )}
 
-                  <div className="flex items-center justify-between pt-4 border-t border-white/20">
-                    <span className="text-xs text-white/60">
-                      Created by {league.users?.username || 'Unknown User'}
-                    </span>
-                    <span className="text-xs text-white/60">
-                      {new Date(league.created_at).toLocaleDateString()}
-                    </span>
+                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                  <div className="flex items-center space-x-2">
+                    <Users className="w-4 h-4" />
+                    <span>{league.current_players}/{league.max_players} players</span>
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>{new Date(league.start_date).toLocaleDateString()}</span>
+                  </div>
+                </div>
+
+                {league.location && (
+                  <div className="flex items-center space-x-2 text-sm text-gray-600 mt-2">
+                    <MapPin className="w-4 h-4" />
+                    <span>{league.location}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                  <span className="text-xs text-gray-500">
+                    Created by {league.users?.username || 'Unknown User'}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {new Date(league.created_at).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             </Link>
@@ -267,70 +250,65 @@ export function DiscoverView() {
           {/* Tournaments */}
           {filteredTournaments.map((tournament) => (
             <Link key={`tournament-${tournament.id}`} href={`/tournaments/${tournament.id}`}>
-              <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6 hover:bg-white/20 transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10 rounded-3xl"></div>
-                <div className="relative z-10">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <span className="text-2xl">{getSportIcon(tournament.sport)}</span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-white text-lg">{tournament.name}</h3>
-                        <p className="text-sm text-white/70 capitalize">{tournament.sport} Tournament</p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col space-y-1">
-                      <span className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-xs font-medium border border-purple-400/30">
-                        Tournament
-                      </span>
-                      <span className="px-3 py-1 bg-orange-500/20 text-orange-300 rounded-full text-xs font-medium border border-orange-400/30">
-                        {tournament.tournament_type}
-                      </span>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(tournament.status)}`}>
-                        {tournament.status}
-                      </span>
+              <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="text-2xl">{getSportIcon(tournament.sport)}</div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{tournament.name}</h3>
+                      <p className="text-sm text-gray-600 capitalize">{tournament.sport} Tournament</p>
                     </div>
                   </div>
-
-                  {tournament.description && (
-                    <p className="text-white/80 text-sm mb-4 line-clamp-2">{tournament.description}</p>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-4 text-sm text-white/70 mb-4">
-                    <div className="flex items-center space-x-2">
-                      <Users className="w-4 h-4" />
-                      <span>{tournament.current_players}/{tournament.max_players} players</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Target className="w-4 h-4" />
-                      <span>{tournament.number_of_courts} courts</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span>🎯</span>
-                      <span>{tournament.points_to_win} points</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="w-4 h-4" />
-                      <span>{new Date(tournament.start_date).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-
-                  {tournament.location && (
-                    <div className="flex items-center space-x-2 text-sm text-white/70 mb-4">
-                      <MapPin className="w-4 h-4" />
-                      <span>{tournament.location}</span>
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between pt-4 border-t border-white/20">
-                    <span className="text-xs text-white/60">
-                      Created by Tournament Creator
+                  <div className="flex items-center space-x-2">
+                    <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
+                      Tournament
                     </span>
-                    <span className="text-xs text-white/60">
-                      {new Date(tournament.created_at).toLocaleDateString()}
+                    <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">
+                      {tournament.tournament_type}
+                    </span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(tournament.status)}`}>
+                      {tournament.status}
                     </span>
                   </div>
+                </div>
+
+                {tournament.description && (
+                  <p className="text-gray-700 text-sm mb-3 line-clamp-2">{tournament.description}</p>
+                )}
+
+                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                  <div className="flex items-center space-x-2">
+                    <Users className="w-4 h-4" />
+                    <span>{tournament.current_players}/{tournament.max_players} players</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Target className="w-4 h-4" />
+                    <span>{tournament.number_of_courts} courts</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span>🎯</span>
+                    <span>{tournament.points_to_win} points</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>{new Date(tournament.start_date).toLocaleDateString()}</span>
+                  </div>
+                </div>
+
+                {tournament.location && (
+                  <div className="flex items-center space-x-2 text-sm text-gray-600 mt-2">
+                    <MapPin className="w-4 h-4" />
+                    <span>{tournament.location}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                  <span className="text-xs text-gray-500">
+                    Created by Tournament Creator
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {new Date(tournament.created_at).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             </Link>
