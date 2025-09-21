@@ -118,7 +118,7 @@ export function CreateTournamentForm() {
     <div className="max-w-2xl mx-auto">
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Tournament Info */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
             <Trophy className="w-5 h-5 text-blue-600" />
             <span>Tournament Details</span>
@@ -251,7 +251,7 @@ export function CreateTournamentForm() {
         </div>
 
         {/* Tournament Settings */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
             <Target className="w-5 h-5 text-blue-600" />
             <span>Tournament Settings</span>
@@ -353,7 +353,7 @@ export function CreateTournamentForm() {
         </div>
 
         {/* Players */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
             <Users className="w-5 h-5 text-blue-600" />
             <span>Players ({players.length}/{typeof formData.maxPlayers === 'string' && formData.maxPlayers === '' ? 8 : formData.maxPlayers})</span>
@@ -459,7 +459,7 @@ export function CreateTournamentForm() {
           <Button
             type="submit"
             disabled={loading || players.length < 4}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-8 py-3 rounded-lg flex items-center space-x-2"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 text-white px-8 py-3 rounded-2xl flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
           >
             {loading ? (
               <>

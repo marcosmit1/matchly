@@ -33,7 +33,7 @@ export default async function RootLayout({
         <link rel="shortcut icon" href="/app-logo.png" />
       </head>
       <body
-        className={geist.className}
+        className={`${geist.className} bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50`}
         style={{
           minHeight: "100dvh",
         }}
