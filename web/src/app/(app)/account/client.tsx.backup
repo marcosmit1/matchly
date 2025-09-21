@@ -258,11 +258,6 @@ export const Client = ({ initialUsername = "" }: { initialUsername?: string }) =
           <p className="mt-1">Tournament management made simple</p>
         </div>
         {/* App Info */}
-        <div className="text-center text-sm text-gray-500">
-          <p>Matchly v1.0</p>
-          <p className="mt-1">Tournament management made simple</p>
-        </div>
-      </div>
     </main>
   );
 };
