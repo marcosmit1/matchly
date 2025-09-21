@@ -97,27 +97,36 @@ export const Client = ({ initialUsername = "" }: { initialUsername?: string }) =
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-6">
-      <div className="max-w-md mx-auto space-y-6">
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 py-6 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
+      </div>
+
+      <div className="max-w-md mx-auto space-y-6 relative z-10">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-          <p className="text-gray-600 mt-1">Manage your account and preferences</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Settings</h1>
+          <p className="text-gray-600 mt-2 text-lg">Manage your account and preferences</p>
         </div>
 
         {/* Profile Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-semibold text-sm">
-                {username.charAt(0).toUpperCase() || 'U'}
-              </span>
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10 rounded-3xl"></div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <span className="text-white font-semibold text-lg">
+                  {username.charAt(0).toUpperCase() || 'U'}
+                </span>
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Profile</h2>
+                <p className="text-gray-600">Update your username</p>
+              </div>
             </div>
-            <div>
-              <h2 className="font-semibold text-gray-900">Profile</h2>
-              <p className="text-sm text-gray-600">Update your username</p>
-            </div>
-          </div>
           
           <div className="space-y-4">
             <div>
@@ -127,11 +136,11 @@ export const Client = ({ initialUsername = "" }: { initialUsername?: string }) =
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Choose a username"
-                  className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    availabilityStatus === 'available' ? 'border-green-300 bg-green-50' :
-                    availabilityStatus === 'taken' ? 'border-red-300 bg-red-50' :
-                    availabilityStatus === 'invalid' ? 'border-red-300 bg-red-50' :
-                    'border-gray-300 bg-white'
+                  className={`w-full px-4 py-3 border rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-300 backdrop-blur-md ${
+                    availabilityStatus === 'available' ? 'border-green-400/50 bg-green-500/10' :
+                    availabilityStatus === 'taken' ? 'border-red-400/50 bg-red-500/10' :
+                    availabilityStatus === 'invalid' ? 'border-red-400/50 bg-red-500/10' :
+                    'border-white/30 bg-white/10'
                   }`}
                   maxLength={20}
                 />
@@ -175,7 +184,7 @@ export const Client = ({ initialUsername = "" }: { initialUsername?: string }) =
               type="button"
               onClick={save}
               disabled={isSaving || isSigningOut || !canSave}
-              className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 text-white font-semibold py-3 px-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none transition-all duration-300"
             >
               {isSaving ? "Saving..." : "Save Changes"}
             </button>
@@ -191,37 +200,42 @@ export const Client = ({ initialUsername = "" }: { initialUsername?: string }) =
         </div>
 
         {/* Notifications Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm">🔔</span>
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10 rounded-3xl"></div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-lg">
+                <span className="text-white text-lg">🔔</span>
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Notifications</h2>
+                <p className="text-gray-600">Manage your notification preferences</p>
+              </div>
             </div>
-            <div>
-              <h2 className="font-semibold text-gray-900">Notifications</h2>
-              <p className="text-sm text-gray-600">Manage your notification preferences</p>
-            </div>
+            <PushNotificationSettings user={{ id: "current-user-id" }} />
           </div>
-          <PushNotificationSettings user={{ id: "current-user-id" }} />
         </div>
 
         {/* Account Actions Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-gray-500 to-gray-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm">⚙️</span>
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10 rounded-3xl"></div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-gray-500 to-gray-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <span className="text-white text-lg">⚙️</span>
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Account</h2>
+                <p className="text-gray-600">Manage your account settings</p>
+              </div>
             </div>
-            <div>
-              <h2 className="font-semibold text-gray-900">Account</h2>
-              <p className="text-sm text-gray-600">Manage your account settings</p>
-            </div>
-          </div>
           
           <div className="space-y-3">
             <button
               type="button"
               onClick={logout}
               disabled={isSaving || isSigningOut}
-              className="w-full bg-red-600 text-white font-semibold py-3 px-4 rounded-xl hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 disabled:from-gray-300 disabled:to-gray-400 text-white font-semibold py-3 px-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none transition-all duration-300 flex items-center justify-center gap-2"
             >
               {isSigningOut ? (
                 <>
@@ -235,6 +249,7 @@ export const Client = ({ initialUsername = "" }: { initialUsername?: string }) =
                 </>
               )}
             </button>
+          </div>
           </div>
         </div>
 

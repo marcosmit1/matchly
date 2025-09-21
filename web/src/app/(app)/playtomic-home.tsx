@@ -232,7 +232,7 @@ export function PlaytomicHome({ username, userStats, timeString, dateString }: P
               <p className="text-sm text-gray-500 mt-1">Create a league or tournament to get started</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {recentActivity.map((activity) => (
                 <Link key={`${activity.type}-${activity.id}`} href={`/${activity.type}s/${activity.id}`}>
                   <div className="flex items-center justify-between p-4 bg-white/50 backdrop-blur-sm rounded-2xl hover:bg-white/80 transition-all duration-300 border border-white/20 shadow-sm hover:shadow-md">
