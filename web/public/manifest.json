@@ -1,7 +1,7 @@
 {
   "name": "Matchly",
   "short_name": "Matchly",
-  "description": "The ultimate tournament companion",
+  "description": "The ultimate sport companion",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait-primary",

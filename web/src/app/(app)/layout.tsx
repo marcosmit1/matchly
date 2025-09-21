@@ -10,7 +10,7 @@ import { ToastContainer } from "@/components/toast";
 
 export const metadata: Metadata = {
   title: "matchly",
-  description: "The ultimate tournament companion",
+  description: "The ultimate sport companion",
   manifest: "/manifest.json",
 };
 

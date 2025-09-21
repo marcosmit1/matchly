@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Mail, Lock, CheckCircle } from "lucide-react";
 import styles from "./login.module.css";
 import { Input } from "@/blocks/input";
 import { Button } from "@/blocks/button";
 import { SEND_VERIFICATION_EMAIL, SEND_OTP_CODE, VERIFY_OTP_CODE, SIGN_IN_WITH_GOOGLE } from "@/app/auth/actions";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/supabase/client";
 import { LoadingSpinner } from "@/components/loading-spinner";
 
@@ -17,13 +17,15 @@ type USER_CREDENTIALS = {
 
 type AuthState = 'email' | 'verification' | 'otp';
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setemail] = useState("");
   const [otp, setotp] = useState("");
   const [isloading, setisloading] = useState(false);
   const [error, seterror] = useState("");
   const [authState, setAuthState] = useState<AuthState>('email');
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl') || '/';
 
   // Check if user is already authenticated
   useEffect(() => {
@@ -32,8 +34,8 @@ export default function LoginPage() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session) {
-        // User is already authenticated, redirect to app
-        router.push('/');
+        // User is already authenticated, redirect to return URL or home
+        router.push(returnUrl);
       }
     };
 
@@ -42,13 +44,13 @@ export default function LoginPage() {
     // Listen for auth state changes
     const { data: { subscription } } = createClient().auth.onAuthStateChange((event: string, session: any) => {
       if (event === 'SIGNED_IN' && session) {
-        // User just signed in (e.g., via email verification link), redirect to app
-        router.push('/');
+        // User just signed in (e.g., via email verification link), redirect to return URL or home
+        router.push(returnUrl);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [router]);
+  }, [router, returnUrl]);
 
   // Check for error parameters in URL
   useEffect(() => {
@@ -138,7 +140,7 @@ export default function LoginPage() {
     seterror("");
 
     try {
-      const result = await VERIFY_OTP_CODE(email, otp);
+      const result = await VERIFY_OTP_CODE(email, otp, returnUrl);
       // If server action returned an error, show it and stop loading
       if (result?.error) {
         seterror(result.error);
@@ -159,7 +161,7 @@ export default function LoginPage() {
     seterror("");
 
     try {
-      await SIGN_IN_WITH_GOOGLE();
+      await SIGN_IN_WITH_GOOGLE(returnUrl);
     } catch (error: unknown) {
       if (error instanceof Error && !error.message.includes("NEXT_REDIRECT")) {
         seterror("An unexpected error occurred. Please try again.");
@@ -232,7 +234,7 @@ export default function LoginPage() {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
             Matchly
           </h1>
-          <p className="text-gray-600 text-lg">Welcome to the ultimate tournament companion</p>
+          <p className="text-gray-600 text-lg">Welcome to The ultimate sport companion</p>
         </div>
 
         {/* Form Container */}
@@ -389,5 +391,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -53,7 +53,7 @@ export async function SEND_OTP_CODE(email: string) {
   return { success: true };
 }
 
-export async function VERIFY_OTP_CODE(email: string, token: string) {
+export async function VERIFY_OTP_CODE(email: string, token: string, returnUrl?: string) {
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.verifyOtp({
@@ -67,18 +67,21 @@ export async function VERIFY_OTP_CODE(email: string, token: string) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect(returnUrl || "/");
 }
 
-export async function SIGN_IN_WITH_GOOGLE() {
+export async function SIGN_IN_WITH_GOOGLE(returnUrl?: string) {
   const supabase = await createClient();
 
   const siteUrl = await getSiteUrl();
+  const callbackUrl = returnUrl 
+    ? `${siteUrl}/auth/callback?next=${encodeURIComponent(returnUrl)}`
+    : `${siteUrl}/auth/callback`;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${siteUrl}/auth/callback`,
+      redirectTo: callbackUrl,
     },
   });
 

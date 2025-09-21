@@ -7,7 +7,7 @@ const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Matchly",
-  description: "The ultimate tournament companion",
+  description: "The ultimate sport companion",
   manifest: "/manifest.json",
 };
 

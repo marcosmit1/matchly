@@ -77,7 +77,7 @@ export default function SplashScreen({ force = false }: { force?: boolean }) {
         
         {/* Loading text */}
         <p className="text-gray-600 text-lg mb-8 transform transition-all duration-1000 delay-300">
-          Welcome to the ultimate tournament companion
+          Welcome to The ultimate sport companion
         </p>
         
         {/* Modern loading spinner */}
