@@ -90,28 +90,35 @@ export function PlaytomicHome({ username, userStats, timeString, dateString }: P
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-20 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
+      </div>
+
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-white/20 px-4 py-4 shadow-sm">
+      <div className="bg-white/10 backdrop-blur-xl border-b border-white/20 px-4 py-4 shadow-sm relative z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-white rounded-2xl shadow-lg flex items-center justify-center p-2">
+            <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl shadow-lg flex items-center justify-center p-2 border border-white/30">
               <img 
                 src="/app-logo.png" 
                 alt="Matchly" 
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain rounded-xl"
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Matchly</h1>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Matchly</h1>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="p-2 rounded-xl bg-white/50 hover:bg-white/80 transition-colors duration-200">
-              <Search className="w-5 h-5 text-gray-600" />
+          <div className="flex items-center space-x-3">
+            <div className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 transition-all duration-200 backdrop-blur-md border border-white/20">
+              <Search className="w-5 h-5 text-gray-700" />
             </div>
-            <div className="relative p-2 rounded-xl bg-white/50 hover:bg-white/80 transition-colors duration-200">
-              <Bell className="w-5 h-5 text-gray-600" />
+            <div className="relative p-3 rounded-2xl bg-white/10 hover:bg-white/20 transition-all duration-200 backdrop-blur-md border border-white/20">
+              <Bell className="w-5 h-5 text-gray-700" />
               <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
                 <span className="text-white text-xs font-bold">20</span>
               </div>
@@ -121,43 +128,74 @@ export function PlaytomicHome({ username, userStats, timeString, dateString }: P
       </div>
 
       {/* Main Content */}
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-4 py-6 space-y-6 relative z-10">
         {/* Welcome Section */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back, {username}</h2>
-          <p className="text-gray-600 text-sm">{timeString} • {dateString}</p>
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10 rounded-3xl"></div>
+          <div className="relative z-10">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {username}</h2>
+            <p className="text-gray-600 text-lg">{timeString} • {dateString}</p>
+          </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-4">
-          <Link href="/leagues">
-            <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-2xl py-4 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300">
-              <Trophy className="w-5 h-5" />
-              <span className="font-semibold">Browse Leagues</span>
-            </Button>
-          </Link>
-          <Link href="/create-league">
-            <Button className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 rounded-2xl py-4 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300">
-              <Plus className="w-5 h-5" />
-              <span className="font-semibold">Create League</span>
-            </Button>
-          </Link>
-        </div>
+        {/* Main Actions - Consolidated */}
+        <div className="space-y-4">
+          <h3 className="text-xl font-semibold text-gray-800 text-center">What would you like to do?</h3>
+          
+          <div className="grid grid-cols-1 gap-4">
+            <Link href="/leagues">
+              <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 rounded-3xl"></div>
+                <div className="relative z-10 flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <Trophy className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900">Browse Leagues</h4>
+                    <p className="text-sm text-gray-600">Join existing leagues or view your current ones</p>
+                  </div>
+                </div>
+              </div>
+            </Link>
 
-        {/* Tournament Actions */}
-        <div className="grid grid-cols-1 gap-4">
-          <Link href="/create-tournament">
-            <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-2xl py-4 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300">
-              <Target className="w-5 h-5" />
-              <span className="font-semibold">Create Tournament</span>
-            </Button>
-          </Link>
+            <Link href="/create-league">
+              <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 via-transparent to-orange-500/10 rounded-3xl"></div>
+                <div className="relative z-10 flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg">
+                    <Plus className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900">Create League</h4>
+                    <p className="text-sm text-gray-600">Start a new league with friends or colleagues</p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            <Link href="/create-tournament">
+              <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-pink-500/10 rounded-3xl"></div>
+                <div className="relative z-10 flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                    <Target className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900">Create Tournament</h4>
+                    <p className="text-sm text-gray-600">Organize a competitive tournament event</p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
         </div>
 
         {/* Stats Overview */}
         {userStats && (
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Stats</h3>
+          <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10 rounded-3xl"></div>
+            <div className="relative z-10">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Stats</h3>
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-gray-900">{matchesPlayed}</div>
@@ -172,12 +210,15 @@ export function PlaytomicHome({ username, userStats, timeString, dateString }: P
                 <div className="text-sm text-gray-600">Skill Level</div>
               </div>
             </div>
+            </div>
           </div>
         )}
 
         {/* Recent Activity */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10 rounded-3xl"></div>
+          <div className="relative z-10">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
           {loadingActivity ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -228,6 +269,7 @@ export function PlaytomicHome({ username, userStats, timeString, dateString }: P
               ))}
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>
