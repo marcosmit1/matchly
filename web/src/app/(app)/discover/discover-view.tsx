@@ -133,13 +133,14 @@ export function DiscoverView() {
               <label className="block text-sm font-medium text-white/90 mb-2">
                 Invite Code
               </label>
-              <Input
+              <input
                 type="text"
                 placeholder="Enter 5-digit code"
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
-                className="w-full text-center font-mono text-lg tracking-wider bg-white/10 border-white/30 text-white placeholder:text-white/60"
+                className="w-full px-4 py-3 text-center font-mono text-lg tracking-wider bg-white/10 border border-white/30 rounded-xl text-white placeholder:text-white/60 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:outline-none transition-all duration-300"
                 maxLength={5}
+                autoFocus
               />
             </div>
             

@@ -110,9 +110,11 @@ export function CustomModal({
           {/* Header */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-lg border border-white/20">
-                {getIcon()}
-              </div>
+              {getIcon() && (
+                <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-lg border border-white/20">
+                  {getIcon()}
+                </div>
+              )}
               <div>
                 <h3 className="text-xl font-bold text-white">{getTitle()}</h3>
               </div>
