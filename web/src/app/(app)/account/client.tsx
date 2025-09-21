@@ -19,86 +19,83 @@ export const Client = ({ initialUsername = "" }: { initialUsername?: string }) =
     setUsername(initialUsername);
   }, [initialUsername]);
 
-  // Check username availability with debouncing
-  useEffect(() => {
-    if (!username || username === initialUsername) {
-      setAvailabilityStatus(null);
-      return;
-    }
-
-    // Validate format first
-    if (!/^[a-zA-Z0-9_-]{3,20}$/.test(username)) {
+  const checkUsernameAvailability = async (username: string) => {
+    if (!username || username.length < 3) {
       setAvailabilityStatus('invalid');
       return;
     }
 
     setIsCheckingAvailability(true);
-    setAvailabilityStatus(null);
+    try {
+      const response = await fetch('/api/check-username', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username })
+      });
+      
+      const data = await response.json();
+      setAvailabilityStatus(data.available ? 'available' : 'taken');
+    } catch (error) {
+      console.error('Error checking username:', error);
+      setAvailabilityStatus(null);
+    } finally {
+      setIsCheckingAvailability(false);
+    }
+  };
 
-    const timeoutId = setTimeout(async () => {
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newUsername = e.target.value;
+    setUsername(newUsername);
+    setAvailabilityStatus(null);
+    
+    if (newUsername.length >= 3) {
+      const timeoutId = setTimeout(() => checkUsernameAvailability(newUsername), 500);
+      return () => clearTimeout(timeoutId);
+    }
+  };
+
+  const handleSave = () => {
+    if (availabilityStatus !== 'available') return;
+    
+    startSave(async () => {
       try {
-        const response = await fetch('/api/account/check-username', {
+        const response = await fetch('/api/update-username', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username }),
+          body: JSON.stringify({ username })
         });
-        const data = await response.json();
         
         if (response.ok) {
-          setAvailabilityStatus(data.available ? 'available' : 'taken');
+          setMsg('Username updated successfully!');
+          setTimeout(() => setMsg(null), 3000);
         } else {
-          setAvailabilityStatus('invalid');
+          setMsg('Failed to update username');
+          setTimeout(() => setMsg(null), 3000);
         }
       } catch (error) {
-        setAvailabilityStatus('invalid');
-      } finally {
-        setIsCheckingAvailability(false);
+        console.error('Error updating username:', error);
+        setMsg('Failed to update username');
+        setTimeout(() => setMsg(null), 3000);
       }
-    }, 500); // 500ms debounce
-
-    return () => {
-      clearTimeout(timeoutId);
-      setIsCheckingAvailability(false);
-    };
-  }, [username, initialUsername]);
-
-  const save = (e?: React.MouseEvent) => {
-    e?.preventDefault();
-    if (isSaving || isSigningOut) return;
-    
-    // Prevent saving if username is not available
-    if (availabilityStatus === 'taken' || availabilityStatus === 'invalid') {
-      setMsg("Please choose a valid, available username");
-      return;
-    }
-    
-    setMsg(null);
-    startSave(async () => {
-      const res = await fetch("/api/account/profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: username.trim() }),
-      });
-      const json = await res.json();
-      if (!res.ok) return setMsg(json.error || "Failed to save");
-      setMsg("Saved ✅");
     });
   };
 
-  const canSave = username.trim() && (availabilityStatus === 'available' || username === initialUsername);
-
-  const logout = (e?: React.MouseEvent) => {
-    e?.preventDefault();
-    if (isSaving || isSigningOut) return;
+  const handleSignOut = () => {
     startLogout(async () => {
-      await fetch("/api/auth/logout", { method: "POST" });
-      window.location.href = "/login";
+      try {
+        const { createClient } = await import('@/supabase/client');
+        const supabase = createClient();
+        await supabase.auth.signOut();
+        window.location.href = "/login";
+      } catch (error) {
+        console.error('Error signing out:', error);
+      }
     });
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 py-6 relative overflow-hidden">
-      {/* Background decorative elements */}
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 py-8 relative overflow-hidden">
+      {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
@@ -127,75 +124,69 @@ export const Client = ({ initialUsername = "" }: { initialUsername?: string }) =
                 <p className="text-gray-600">Update your username</p>
               </div>
             </div>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
-              <div className="relative">
-                <input
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Choose a username"
-                  className={`w-full px-4 py-3 border rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-300 backdrop-blur-md ${
-                    availabilityStatus === 'available' ? 'border-green-400/50 bg-green-500/10' :
-                    availabilityStatus === 'taken' ? 'border-red-400/50 bg-red-500/10' :
-                    availabilityStatus === 'invalid' ? 'border-red-400/50 bg-red-500/10' :
-                    'border-white/30 bg-white/10'
-                  }`}
-                  maxLength={20}
-                />
-                {isCheckingAvailability && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                    <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                  </div>
-                )}
+
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+                  Username
+                </label>
+                <div className="relative">
+                  <input
+                    id="username"
+                    type="text"
+                    value={username}
+                    onChange={handleUsernameChange}
+                    className={`w-full px-4 py-3 border rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-300 backdrop-blur-md ${
+                      availabilityStatus === 'available' 
+                        ? 'border-green-500 bg-green-50/50' 
+                        : availabilityStatus === 'taken' 
+                        ? 'border-red-500 bg-red-50/50' 
+                        : 'border-gray-300 bg-white/50'
+                    }`}
+                    placeholder="Enter your username"
+                  />
+                  {isCheckingAvailability && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                    </div>
+                  )}
+                </div>
                 {availabilityStatus === 'available' && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500">
-                    ✓
-                  </div>
+                  <p className="text-green-600 text-sm mt-1">✓ Username is available</p>
                 )}
                 {availabilityStatus === 'taken' && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500">
-                    ✗
-                  </div>
+                  <p className="text-red-600 text-sm mt-1">✗ Username is already taken</p>
                 )}
                 {availabilityStatus === 'invalid' && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500">
-                    !
-                  </div>
+                  <p className="text-yellow-600 text-sm mt-1">Username must be at least 3 characters</p>
                 )}
               </div>
-              
-              {/* Status messages */}
-              {availabilityStatus === 'available' && (
-                <div className="text-green-600 text-sm mt-2">✓ Username is available</div>
+
+              {msg && (
+                <div className={`p-3 rounded-2xl text-sm ${
+                  msg.includes('successfully') 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-red-100 text-red-800'
+                }`}>
+                  {msg}
+                </div>
               )}
-              {availabilityStatus === 'taken' && (
-                <div className="text-red-600 text-sm mt-2">✗ Username is already taken</div>
-              )}
-              {availabilityStatus === 'invalid' && (
-                <div className="text-red-600 text-sm mt-2">! Must be 3-20 characters (letters, numbers, _, -)</div>
-              )}
-              
-              <p className="text-sm text-gray-500 mt-2">This will be your display name in leagues and matches</p>
+
+              <button
+                onClick={handleSave}
+                disabled={availabilityStatus !== 'available' || isSaving}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 text-white font-semibold py-3 px-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none transition-all duration-300"
+              >
+                {isSaving ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                    Saving...
+                  </div>
+                ) : (
+                  'Save Changes'
+                )}
+              </button>
             </div>
-            
-            <button
-              type="button"
-              onClick={save}
-              disabled={isSaving || isSigningOut || !canSave}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 text-white font-semibold py-3 px-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none transition-all duration-300"
-            >
-              {isSaving ? "Saving..." : "Save Changes"}
-            </button>
-            
-            {msg && (
-              <div className={`text-sm p-3 rounded-lg ${
-                msg.includes('✅') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-              }`}>
-                {msg}
-              </div>
-            )}
           </div>
         </div>
 
@@ -229,27 +220,26 @@ export const Client = ({ initialUsername = "" }: { initialUsername?: string }) =
                 <p className="text-gray-600">Manage your account settings</p>
               </div>
             </div>
-          
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={logout}
-              disabled={isSaving || isSigningOut}
-              className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 disabled:from-gray-300 disabled:to-gray-400 text-white font-semibold py-3 px-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none transition-all duration-300 flex items-center justify-center gap-2"
-            >
-              {isSigningOut ? (
-                <>
-                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                  Signing out...
-                </>
-              ) : (
-                <>
-                  <span>🚪</span>
-                  Sign Out
-                </>
-              )}
-            </button>
-          </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 disabled:from-gray-300 disabled:to-gray-400 text-white font-semibold py-3 px-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                {isSigningOut ? (
+                  <>
+                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                    Signing Out...
+                  </>
+                ) : (
+                  <>
+                    <span>🚪</span>
+                    Sign Out
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
