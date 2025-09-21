@@ -223,10 +223,11 @@ export function CreateTournamentForm() {
                   dateFormat="dd/MM/yyyy"
                   minDate={new Date()}
                   className="pl-10 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
-                  wrapperClassName="w-full"
+                  wrapperClassName="w-full relative z-50"
                   showPopperArrow={false}
                   isClearable
                   autoComplete="off"
+                  popperClassName="z-50"
                 />
               </div>
             </div>

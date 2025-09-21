@@ -338,11 +338,11 @@ export function CreateLeagueForm() {
               placeholderText="Select start date"
               dateFormat="dd/MM/yyyy"
               minDate={new Date()}
-              wrapperClassName="w-full"
+              wrapperClassName="w-full relative z-50"
               showPopperArrow={false}
               isClearable
               autoComplete="off"
-              popperClassName="react-datepicker-popper"
+              popperClassName="z-50"
             />
           </div>
           <p className="text-xs text-gray-500 mt-1">Leave empty if start date is flexible</p>
