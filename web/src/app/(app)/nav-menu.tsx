@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useMemo } from "react";
+import { ReactNode, useEffect, useMemo, memo } from "react";
 import Link from "next/link";
 import { HomeIcon, SettingsIcon, PlusCircleIcon, UsersIcon, ClockIcon, BellIcon, Target, MessageCircle, Trophy, Play, Search } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
@@ -13,7 +13,7 @@ type TabItem = {
   label: string;
 };
 
-function Menu() {
+const Menu = memo(function Menu() {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -64,6 +64,6 @@ function Menu() {
       </div>
     </nav>
   );
-}
+});
 
 export default Menu;
