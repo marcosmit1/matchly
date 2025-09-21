@@ -196,11 +196,11 @@ export function DiscoverView() {
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {filteredLeagues.map((league) => (
             <Link key={league.id} href={`/leagues/${league.id}`}>
-              <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between mb-3">
+              <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
                     <div className="text-2xl">{getSportIcon(league.sport)}</div>
                     <div>
@@ -214,10 +214,10 @@ export function DiscoverView() {
                 </div>
 
                 {league.description && (
-                  <p className="text-gray-700 text-sm mb-3 line-clamp-2">{league.description}</p>
+                  <p className="text-gray-700 text-sm mb-4 line-clamp-2">{league.description}</p>
                 )}
 
-                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
                   <div className="flex items-center space-x-2">
                     <Users className="w-4 h-4" />
                     <span>{league.current_players}/{league.max_players} players</span>
@@ -229,13 +229,13 @@ export function DiscoverView() {
                 </div>
 
                 {league.location && (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600 mt-2">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
                     <MapPin className="w-4 h-4" />
                     <span>{league.location}</span>
                   </div>
                 )}
 
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                   <span className="text-xs text-gray-500">
                     Created by {league.users?.username || 'Unknown User'}
                   </span>
@@ -250,8 +250,8 @@ export function DiscoverView() {
           {/* Tournaments */}
           {filteredTournaments.map((tournament) => (
             <Link key={`tournament-${tournament.id}`} href={`/tournaments/${tournament.id}`}>
-              <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between mb-3">
+              <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
                     <div className="text-2xl">{getSportIcon(tournament.sport)}</div>
                     <div>
@@ -273,10 +273,10 @@ export function DiscoverView() {
                 </div>
 
                 {tournament.description && (
-                  <p className="text-gray-700 text-sm mb-3 line-clamp-2">{tournament.description}</p>
+                  <p className="text-gray-700 text-sm mb-4 line-clamp-2">{tournament.description}</p>
                 )}
 
-                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
                   <div className="flex items-center space-x-2">
                     <Users className="w-4 h-4" />
                     <span>{tournament.current_players}/{tournament.max_players} players</span>
@@ -296,13 +296,13 @@ export function DiscoverView() {
                 </div>
 
                 {tournament.location && (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600 mt-2">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
                     <MapPin className="w-4 h-4" />
                     <span>{tournament.location}</span>
                   </div>
                 )}
 
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                   <span className="text-xs text-gray-500">
                     Created by Tournament Creator
                   </span>
