@@ -216,7 +216,7 @@ export default function LoginPage() {
         <div className="absolute top-40 left-40 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
       
-      <div className="w-full max-w-md relative z-10">
+      <div className="w-full max-w-sm relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="relative mb-8">
@@ -236,16 +236,16 @@ export default function LoginPage() {
         </div>
 
         {/* Form Container */}
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 space-y-6 relative overflow-hidden">
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6 space-y-5 relative overflow-hidden">
           {/* Liquid glass effect overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10 rounded-3xl"></div>
           <div className="relative z-10">
           {authState === 'email' && (
             // Email input phase
             <>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/70" />
+                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white drop-shadow-lg" />
                   <Input
                     type="email"
                     placeholder="Enter your email"
@@ -327,9 +327,9 @@ export default function LoginPage() {
                 </div>
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/70" />
+                  <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white drop-shadow-lg" />
                   <Input
                     type="text"
                     placeholder="Enter 6-digit code"
@@ -372,7 +372,7 @@ export default function LoginPage() {
         )}
 
         {/* Google Sign In Button */}
-        <div className="mt-6">
+        <div className="mt-4">
           <Button
             onClick={HANDLE_GOOGLE_SIGN_IN}
             className="w-full h-14 bg-black/20 hover:bg-black/30 text-white border border-white/30 hover:border-white/50 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center space-x-3 backdrop-blur-md shadow-inner"
