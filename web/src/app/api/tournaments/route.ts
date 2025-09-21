@@ -44,6 +44,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Generate unique 5-digit invite code
+    const { data: inviteCodeData, error: inviteCodeError } = await supabase
+      .rpc('generate_unique_invite_code');
+    
+    if (inviteCodeError) {
+      console.error("Error generating invite code:", inviteCodeError);
+      return NextResponse.json(
+        { error: "Failed to generate invite code" },
+        { status: 500 }
+      );
+    }
+
+    const inviteCode = inviteCodeData;
+    const inviteLink = `https://matchly-jet.vercel.app/join/${inviteCode}`;
+
     // Create tournament
     const { data: tournament, error: tournamentError } = await supabase
       .from("tournaments")
@@ -60,6 +75,8 @@ export async function POST(request: NextRequest) {
         points_to_win: pointsToWin,
         status: "open",
         created_by: user.id,
+        invite_code: inviteCode,
+        invite_link: inviteLink,
       })
       .select()
       .single();

@@ -1,8 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, MapPin, Users, Calendar, Trophy, Plus, Target } from 'lucide-react';
+import { Search, MapPin, Users, Calendar, Trophy, Plus, Target, Hash } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from '@/blocks/button';
+import { Input } from '@/blocks/input';
+import { showToast } from '@/components/toast';
 
 interface League {
   id: string;
@@ -48,6 +51,8 @@ export function DiscoverView() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sportFilter, setSportFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState<'all' | 'leagues' | 'tournaments'>('all');
+  const [inviteCode, setInviteCode] = useState('');
+  const [joining, setJoining] = useState(false);
 
   useEffect(() => {
     fetchPublicData();
@@ -106,6 +111,53 @@ export function DiscoverView() {
     }
   };
 
+  const handleJoinWithCode = async () => {
+    if (!inviteCode.trim()) {
+      showToast({ type: "error", title: "Please enter an invite code" });
+      return;
+    }
+
+    setJoining(true);
+    try {
+      const response = await fetch('/api/join', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ inviteCode: inviteCode.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        showToast({ 
+          type: "success", 
+          title: data.message || "Successfully joined!" 
+        });
+
+        // Redirect to the appropriate page
+        if (data.type === 'tournament') {
+          window.location.href = `/tournaments/${data.data.tournament_id}`;
+        } else if (data.type === 'league') {
+          window.location.href = `/leagues/${data.data.league_id}`;
+        }
+      } else {
+        showToast({ 
+          type: "error", 
+          title: data.error || "Invalid invite code" 
+        });
+      }
+    } catch (error) {
+      console.error('Error joining with code:', error);
+      showToast({ 
+        type: "error", 
+        title: "An unexpected error occurred" 
+      });
+    } finally {
+      setJoining(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -127,6 +179,31 @@ export function DiscoverView() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
+        </div>
+
+        {/* Join with Invite Code */}
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-4">
+          <div className="flex items-center space-x-2 mb-3">
+            <Hash className="w-5 h-5 text-green-600" />
+            <h3 className="text-sm font-semibold text-gray-900">Join with Invite Code</h3>
+          </div>
+          <div className="flex space-x-2">
+            <Input
+              type="text"
+              placeholder="Enter 5-digit code"
+              value={inviteCode}
+              onChange={(e) => setInviteCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+              className="flex-1 text-center font-mono text-lg tracking-wider"
+              maxLength={5}
+            />
+            <Button
+              onClick={handleJoinWithCode}
+              disabled={joining || inviteCode.length !== 5}
+              className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 text-white px-6"
+            >
+              {joining ? 'Joining...' : 'Join'}
+            </Button>
+          </div>
         </div>
 
         <div className="flex space-x-2 overflow-x-auto pb-2">

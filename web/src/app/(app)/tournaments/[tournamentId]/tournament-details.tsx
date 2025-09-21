@@ -14,7 +14,8 @@ import {
   Settings,
   Share2,
   Copy,
-  Check
+  Check,
+  Hash
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/blocks/button";
@@ -35,6 +36,8 @@ interface Tournament {
   tournament_type: string;
   number_of_courts: number;
   points_to_win: number;
+  invite_code?: string;
+  invite_link?: string;
 }
 
 interface TournamentDetailsProps {
@@ -466,6 +469,35 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
               )}
               <span>{copied ? 'Copied!' : 'Share Invite Link'}</span>
             </Button>
+
+            {/* Invite Code Display */}
+            {tournament.invite_code && (
+              <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-4">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Hash className="w-4 h-4 text-green-600" />
+                  <span className="text-sm font-semibold text-gray-900">Invite Code</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-center">
+                    <span className="font-mono text-lg font-bold text-gray-900 tracking-wider">
+                      {tournament.invite_code}
+                    </span>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      navigator.clipboard.writeText(tournament.invite_code!);
+                      showSuccess('Invite code copied!');
+                    }}
+                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-600 mt-2">
+                  Share this 5-digit code for easy joining
+                </p>
+              </div>
+            )}
             
             {/* Player Actions */}
             {(!currentUser || currentUser.id !== tournament.created_by) && (
