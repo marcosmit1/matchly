@@ -442,7 +442,7 @@ export function CreateTournamentForm() {
             <div className="text-center py-8">
               <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No players added yet</h3>
-              <p className="text-gray-500">Add at least 4 players to create the tournament</p>
+              <p className="text-gray-500">Add players now or share the tournament link later for others to join</p>
             </div>
           )}
         </div>
@@ -451,7 +451,7 @@ export function CreateTournamentForm() {
         <div className="flex justify-end">
           <Button
             type="submit"
-            disabled={loading || players.length < 4}
+            disabled={loading}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 text-white px-8 py-3 rounded-2xl flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
           >
             {loading ? (
