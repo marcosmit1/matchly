@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, MapPin, Users, Calendar, Trophy, Plus, Target, Hash } from 'lucide-react';
+import { Search, MapPin, Users, Calendar, Trophy, Plus, Target, Hash, CheckCircle, X } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/blocks/button';
 import { Input } from '@/blocks/input';
@@ -54,6 +54,13 @@ export function DiscoverView() {
   const [typeFilter, setTypeFilter] = useState<'all' | 'leagues' | 'tournaments'>('all');
   const [inviteCode, setInviteCode] = useState('');
   const [joining, setJoining] = useState(false);
+  const [validatingCode, setValidatingCode] = useState(false);
+  const [codeValidation, setCodeValidation] = useState<{
+    valid: boolean;
+    type?: 'tournament' | 'league';
+    data?: any;
+    error?: string;
+  } | null>(null);
   const { showModal } = useModal();
 
   useEffect(() => {
@@ -113,9 +120,36 @@ export function DiscoverView() {
     }
   };
 
+  const validateInviteCode = async (code: string) => {
+    if (code.length !== 5) {
+      setCodeValidation(null);
+      return;
+    }
+
+    setValidatingCode(true);
+    try {
+      const response = await fetch('/api/validate-invite-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ inviteCode: code }),
+      });
+
+      const data = await response.json();
+      setCodeValidation(data);
+    } catch (error) {
+      console.error('Error validating invite code:', error);
+      setCodeValidation({ valid: false, error: 'Failed to validate code' });
+    } finally {
+      setValidatingCode(false);
+    }
+  };
+
   const showJoinCodeModal = () => {
     // Reset invite code when opening modal
     setInviteCode('');
+    setCodeValidation(null);
     
     showModal({
       title: "Join with Invite Code",
@@ -144,21 +178,68 @@ export function DiscoverView() {
                   const value = e.target.value.replace(/\D/g, '').slice(0, 5);
                   setInviteCode(value);
                   e.target.value = value; // Update the input value directly
+                  
+                  // Validate code in real-time
+                  if (value.length === 5) {
+                    validateInviteCode(value);
+                  } else {
+                    setCodeValidation(null);
+                  }
                 }}
-                className="w-full px-4 py-3 text-center font-mono text-lg tracking-wider bg-white/20 border-2 border-white/40 rounded-xl text-white placeholder:text-white/60 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:outline-none transition-all duration-300"
+                className={`w-full px-4 py-3 text-center font-mono text-lg tracking-wider rounded-xl text-white placeholder:text-white/60 focus:ring-2 focus:ring-blue-500/50 focus:outline-none transition-all duration-300 ${
+                  codeValidation?.valid 
+                    ? 'bg-green-500/20 border-2 border-green-500/50' 
+                    : codeValidation?.valid === false 
+                    ? 'bg-red-500/20 border-2 border-red-500/50' 
+                    : 'bg-white/20 border-2 border-white/40'
+                }`}
                 maxLength={5}
                 autoFocus
                 style={{
                   color: 'white',
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  border: '2px solid rgba(255, 255, 255, 0.4)',
                 }}
               />
+              
+              {/* Validation Status */}
+              {validatingCode && (
+                <div className="flex items-center justify-center mt-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span className="text-white/70 text-sm ml-2">Validating...</span>
+                </div>
+              )}
+              
+              {codeValidation && !validatingCode && (
+                <div className={`mt-2 p-3 rounded-xl ${
+                  codeValidation.valid 
+                    ? 'bg-green-500/20 border border-green-500/30' 
+                    : 'bg-red-500/20 border border-red-500/30'
+                }`}>
+                  {codeValidation.valid ? (
+                    <div className="text-center">
+                      <div className="flex items-center justify-center space-x-2 text-green-400 mb-1">
+                        <CheckCircle className="w-4 h-4" />
+                        <span className="font-semibold">Valid Code!</span>
+                      </div>
+                      <p className="text-white/80 text-sm">
+                        {codeValidation.type === 'tournament' ? '🏆' : '🏆'} {codeValidation.data?.name}
+                      </p>
+                      {codeValidation.data?.is_full && (
+                        <p className="text-yellow-400 text-xs mt-1">⚠️ This {codeValidation.type} is full</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center space-x-2 text-red-400">
+                      <X className="w-4 h-4" />
+                      <span className="text-sm">{codeValidation.error}</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             
             <Button
               onClick={handleJoinWithCode}
-              disabled={joining || inviteCode.length !== 5}
+              disabled={joining || !codeValidation?.valid || codeValidation?.data?.is_full}
               className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 text-white py-3 rounded-xl"
             >
               {joining ? 'Joining...' : 'Join'}
