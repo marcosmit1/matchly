@@ -11,7 +11,10 @@ import {
   Trophy,
   Clock,
   Play,
-  Settings
+  Settings,
+  Share2,
+  Copy,
+  Check
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/blocks/button";
@@ -50,19 +53,33 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
   const [finalRankings, setFinalRankings] = useState<any[]>([]);
   const [loadingRankings, setLoadingRankings] = useState(false);
   const [playoffsComplete, setPlayoffsComplete] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [joining, setJoining] = useState(false);
+  const [isParticipant, setIsParticipant] = useState(false);
   const { showConfirm, showSuccess, showError } = useModal();
 
   useEffect(() => {
-    fetchParticipants();
     fetchCurrentUser();
     fetchRounds();
   }, [tournament.id]);
+
+  useEffect(() => {
+    if (currentUser) {
+      fetchParticipants();
+    }
+  }, [currentUser, tournament.id]);
 
   const fetchParticipants = async () => {
     try {
       const response = await fetch(`/api/tournaments/${tournament.id}/players`);
       const data = await response.json();
       setParticipants(data.players || []);
+      
+      // Check if current user is a participant
+      if (currentUser) {
+        const userIsParticipant = data.players?.some((player: any) => player.created_by === currentUser.id);
+        setIsParticipant(userIsParticipant);
+      }
     } catch (error) {
       console.error('Error fetching participants:', error);
     } finally {
@@ -169,6 +186,46 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
       alert('Failed to start playoffs. Please try again.');
     } finally {
       setStartingPlayoffs(false);
+    }
+  };
+
+  const copyInviteLink = async () => {
+    const inviteUrl = `${window.location.origin}/tournaments/${tournament.id}`;
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopied(true);
+      showSuccess('Invite link copied to clipboard!');
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      showError('Failed to copy invite link');
+    }
+  };
+
+  const joinTournament = async () => {
+    if (!currentUser) {
+      showError('Please log in to join the tournament');
+      return;
+    }
+
+    setJoining(true);
+    try {
+      const response = await fetch(`/api/tournaments/${tournament.id}/join`, {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        showSuccess('Successfully joined the tournament!');
+        setIsParticipant(true);
+        // Refresh participants list
+        await fetchParticipants();
+      } else {
+        const error = await response.json();
+        showError(error.error || 'Failed to join tournament');
+      }
+    } catch (error) {
+      showError('Failed to join tournament');
+    } finally {
+      setJoining(false);
     }
   };
 
@@ -397,15 +454,53 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
               </div>
             )}
             
+            {/* Invite Link Button - Show for all users when tournament is open */}
+            <Button 
+              onClick={copyInviteLink}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-3 flex items-center justify-center space-x-2"
+            >
+              {copied ? (
+                <Check className="w-5 h-5" />
+              ) : (
+                <Share2 className="w-5 h-5" />
+              )}
+              <span>{copied ? 'Copied!' : 'Share Invite Link'}</span>
+            </Button>
+            
             {/* Player Actions */}
             {(!currentUser || currentUser.id !== tournament.created_by) && (
               <div className="grid grid-cols-2 gap-3">
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-3 flex items-center justify-center space-x-2">
-                  <Users className="w-5 h-5" />
-                  <span>Join Tournament</span>
-                </Button>
-                <Button className="w-full bg-gray-600 hover:bg-gray-700 text-white rounded-xl py-3 flex items-center justify-center space-x-2">
-                  <Settings className="w-5 h-5" />
+                {!isParticipant ? (
+                  <Button 
+                    onClick={joinTournament}
+                    disabled={joining || tournament.current_players >= tournament.max_players}
+                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-xl py-3 flex items-center justify-center space-x-2"
+                  >
+                    {joining ? (
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    ) : (
+                      <Users className="w-5 h-5" />
+                    )}
+                    <span>
+                      {joining ? 'Joining...' : 
+                       tournament.current_players >= tournament.max_players ? 'Tournament Full' : 
+                       'Join Tournament'}
+                    </span>
+                  </Button>
+                ) : (
+                  <Button 
+                    disabled
+                    className="w-full bg-green-600 text-white rounded-xl py-3 flex items-center justify-center space-x-2"
+                  >
+                    <Users className="w-5 h-5" />
+                    <span>Joined</span>
+                  </Button>
+                )}
+                <Button 
+                  onClick={copyInviteLink}
+                  className="w-full bg-gray-600 hover:bg-gray-700 text-white rounded-xl py-3 flex items-center justify-center space-x-2"
+                >
+                  <Share2 className="w-5 h-5" />
                   <span>Share</span>
                 </Button>
               </div>
