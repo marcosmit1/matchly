@@ -218,9 +218,10 @@ input:-webkit-autofill:active {
   transition: background-color 5000s ease-in-out 0s;
 }
 
-/* Hide scrollbars globally */
+/* Hide scrollbars globally but allow scrolling */
 html {
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 body {
@@ -278,7 +279,8 @@ body::-webkit-scrollbar {
     position: fixed;
     top: 0;
     left: 0;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
   
   body {
