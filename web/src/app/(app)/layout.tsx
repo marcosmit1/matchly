@@ -29,9 +29,22 @@ export default async function RootLayout({
   }
 
   return (
-    <div className="w-full min-h-screen bg-gray-50" style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "calc(env(safe-area-inset-bottom) + 80px)" }}>
-      {children}
-      <NavWrapper />
+    <div className="w-full h-screen bg-gray-50 flex flex-col" style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}>
+      {/* Fixed Header Area */}
+      <div className="flex-shrink-0">
+        {/* Content will be in a scrollable container */}
+      </div>
+      
+      {/* Scrollable Content Area */}
+      <div className="flex-1 scrollable-content" style={{ paddingBottom: "80px" }}>
+        {children}
+      </div>
+      
+      {/* Fixed Navigation */}
+      <div className="flex-shrink-0">
+        <NavWrapper />
+      </div>
+      
       <ServiceWorkerNavigation />
       <ToastContainer />
     </div>

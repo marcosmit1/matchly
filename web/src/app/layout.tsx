@@ -36,7 +36,12 @@ export default async function RootLayout({
       <body
         className={`${geist.className} bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50`}
         style={{
-          minHeight: "100dvh",
+          height: "100dvh",
+          overflow: "hidden",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
         }}
       >
         <ModalProvider>
