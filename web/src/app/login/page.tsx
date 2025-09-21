@@ -220,11 +220,11 @@ export default function LoginPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="relative mb-8">
-            <div className="w-40 h-40 mx-auto bg-white/20 backdrop-blur-md rounded-3xl shadow-2xl border border-white/30 flex items-center justify-center p-6 transform hover:scale-105 transition-all duration-300">
+            <div className="w-40 h-40 mx-auto bg-white/20 backdrop-blur-md rounded-3xl shadow-2xl border border-white/30 flex items-center justify-center p-3 transform hover:scale-105 transition-all duration-300">
               <img 
                 src="/app-logo.png" 
                 alt="Matchly" 
-                className="w-24 h-24 object-contain"
+                className="w-32 h-32 object-contain rounded-2xl"
               />
             </div>
             <div className="absolute inset-0 w-40 h-40 mx-auto bg-gradient-to-r from-blue-400 to-purple-500 rounded-3xl blur-xl opacity-40 -z-10 animate-pulse"></div>
@@ -251,7 +251,7 @@ export default function LoginPage() {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setemail(e.target.value)}
-                    className="pl-12 w-full h-14 border border-white/30 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 bg-white/10 backdrop-blur-md transition-all duration-300 text-white placeholder:text-white/70"
+                    className="pl-12 w-full h-14 border border-white/30 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 bg-black/20 backdrop-blur-md transition-all duration-300 text-white placeholder:text-white/80 shadow-inner"
                     autoCapitalize="none"
                     required
                   />
@@ -335,7 +335,7 @@ export default function LoginPage() {
                     placeholder="Enter 6-digit code"
                     value={otp}
                     onChange={(e) => setotp(e.target.value)}
-                    className="pl-12 w-full h-14 border border-white/30 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 bg-white/10 backdrop-blur-md text-center text-lg tracking-widest transition-all duration-300 text-white placeholder:text-white/70"
+                    className="pl-12 w-full h-14 border border-white/30 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 bg-black/20 backdrop-blur-md text-center text-lg tracking-widest transition-all duration-300 text-white placeholder:text-white/80 shadow-inner"
                     maxLength={6}
                     required
                   />
@@ -375,7 +375,7 @@ export default function LoginPage() {
         <div className="mt-6">
           <Button
             onClick={HANDLE_GOOGLE_SIGN_IN}
-            className="w-full h-14 bg-white/10 hover:bg-white/20 text-white border border-white/30 hover:border-white/50 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center space-x-3 backdrop-blur-md"
+            className="w-full h-14 bg-black/20 hover:bg-black/30 text-white border border-white/30 hover:border-white/50 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center space-x-3 backdrop-blur-md shadow-inner"
             disabled={isloading}
           >
             <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
