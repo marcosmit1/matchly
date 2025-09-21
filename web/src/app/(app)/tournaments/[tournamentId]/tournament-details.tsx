@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useModal } from "@/contexts/modal-context";
+import { TournamentGuestPlayerManager } from "@/components/tournament-guest-player-manager";
 import { 
   ArrowLeft, 
   Users, 
@@ -761,6 +762,17 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
                       </span>
                     </div>
                   ))}
+                </div>
+              )}
+              
+              {/* Guest Player Manager - Only show for tournament creator */}
+              {currentUser && currentUser.id === tournament.created_by && (
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <TournamentGuestPlayerManager
+                    tournamentId={tournament.id}
+                    maxPlayers={tournament.max_players}
+                    currentPlayers={tournament.current_players}
+                  />
                 </div>
               )}
             </div>
