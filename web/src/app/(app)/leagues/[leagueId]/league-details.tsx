@@ -44,7 +44,6 @@ export function LeagueDetails({ leagueId }: { leagueId: string }) {
   const [copiedLink, setCopiedLink] = useState(false);
   const { showConfirm, showSuccess, showError } = useModal();
   const [showSettings, setShowSettings] = useState(false);
-  const [addingTestPlayers, setAddingTestPlayers] = useState(false);
   const [generatingMatches, setGeneratingMatches] = useState(false);
 
   useEffect(() => {
@@ -182,8 +181,13 @@ export function LeagueDetails({ leagueId }: { leagueId: string }) {
     }
 
     try {
-      // Use the test version that works with simulated players
-      const response = await fetch(`/api/leagues/${leagueId}/start-test`, {
+      // Check if league has enough participants
+      if (participants.length < 4) {
+        await showError('You need at least 4 participants to start a league');
+        return;
+      }
+
+      const response = await fetch(`/api/leagues/${leagueId}/start`, {
         method: 'POST',
       });
 
@@ -223,33 +227,6 @@ export function LeagueDetails({ leagueId }: { leagueId: string }) {
     }
   };
 
-  const addTestPlayers = async () => {
-    if (!confirm("This will add 20 test players to your league. Continue?")) {
-      return;
-    }
-
-    setAddingTestPlayers(true);
-    try {
-      const response = await fetch(`/api/leagues/${leagueId}/add-test-players`, {
-        method: 'POST',
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to add test players');
-      }
-
-      // Refresh league details and participants
-      fetchLeagueDetails();
-      fetchParticipants();
-      alert('Successfully added 20 test players!');
-    } catch (error) {
-      console.error('Error adding test players:', error);
-      alert(error instanceof Error ? error.message : 'Failed to add test players');
-    } finally {
-      setAddingTestPlayers(false);
-    }
-  };
 
   const joinLeague = async () => {
     if (!league?.invite_code) {
@@ -321,6 +298,7 @@ export function LeagueDetails({ leagueId }: { leagueId: string }) {
     switch (sport) {
       case "squash": return "🏸";
       case "padel": return "🎾";
+      case "pickleball": return "🏓";
       default: return "🏆";
     }
   };
@@ -466,17 +444,6 @@ export function LeagueDetails({ leagueId }: { leagueId: string }) {
             <>
               {league.status === "open" && (
                 <>
-                  <Button
-                    onClick={addTestPlayers}
-                    disabled={addingTestPlayers}
-                    className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white rounded-xl py-4 flex items-center justify-center space-x-2"
-                  >
-                    <Users className="w-5 h-5" />
-                    <span className="font-medium">
-                      {addingTestPlayers ? "Adding..." : "Add Test Players"}
-                    </span>
-                  </Button>
-                  
                   <Button
                     onClick={startLeague}
                     className="bg-green-600 hover:bg-green-700 text-white rounded-xl py-4 flex items-center justify-center space-x-2"

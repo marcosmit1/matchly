@@ -18,23 +18,10 @@ export async function GET(
 
     const { tournamentId } = await params;
 
-    // Fetch tournament participants including guest players
+    // Simple query for tournament participants
     const { data: participants, error } = await supabase
       .from("tournament_players")
-      .select(`
-        *,
-        users:user_id (
-          id,
-          email,
-          user_metadata
-        ),
-        guest_players:guest_player_id (
-          id,
-          name,
-          email,
-          phone
-        )
-      `)
+      .select("*")
       .eq("tournament_id", tournamentId);
 
     if (error) {
@@ -45,8 +32,9 @@ export async function GET(
       );
     }
 
-    // Transform the data to include guest player info
-    const transformedParticipants = participants.map((participant) => ({
+    // For now, just return basic participant info
+    // We can enhance this later if needed
+    const transformedParticipants = (participants || []).map((participant) => ({
       id: participant.id,
       tournament_id: participant.tournament_id,
       user_id: participant.user_id,
@@ -54,15 +42,9 @@ export async function GET(
       status: participant.status,
       created_at: participant.created_at,
       is_guest: !!participant.guest_player_id,
-      name: participant.guest_player_id 
-        ? (participant.guest_players as any)?.name 
-        : (participant.users as any)?.user_metadata?.username || (participant.users as any)?.email,
-      email: participant.guest_player_id 
-        ? (participant.guest_players as any)?.email 
-        : (participant.users as any)?.email,
-      phone: participant.guest_player_id 
-        ? (participant.guest_players as any)?.phone 
-        : null,
+      name: participant.guest_player_id ? 'Guest Player' : 'Regular Player',
+      email: null,
+      phone: null,
     }));
 
     return NextResponse.json({
@@ -95,7 +77,7 @@ export async function POST(
 
     const { tournamentId } = await params;
     const body = await request.json();
-    const { name, email, phone } = body;
+    const { name } = body;
 
     // Validate required fields
     if (!name || name.trim().length === 0) {
@@ -109,8 +91,8 @@ export async function POST(
     const { data, error } = await supabase.rpc("add_guest_player_to_tournament", {
       p_tournament_id: tournamentId,
       p_name: name.trim(),
-      p_email: email?.trim() || null,
-      p_phone: phone?.trim() || null,
+      p_email: null,  // No email for simplified guest players
+      p_phone: null,  // No phone for simplified guest players
     });
 
     if (error) {

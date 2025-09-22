@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
       .from("leagues")
       .select(`
         *,
-        league_participants!left (
+        league_participants (
           user_id,
           status
         )
@@ -185,6 +185,7 @@ export async function GET(request: NextRequest) {
       const isParticipant = league.league_participants?.some(
         (participant: any) => participant.user_id === user.id && participant.status === 'confirmed'
       ) || false;
+
 
       const processedLeague = {
         ...league,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Search, MapPin, Users, Calendar, Trophy, Plus, Target, Hash, CheckCircle, X } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/blocks/button';
@@ -61,11 +61,19 @@ export function DiscoverView() {
     data?: any;
     error?: string;
   } | null>(null);
-  const { showModal } = useModal();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { showModal, hideModal } = useModal();
 
   useEffect(() => {
     fetchPublicData();
   }, []);
+
+  // Debug effect to track codeValidation state changes
+  useEffect(() => {
+    console.log('🔄 useEffect - codeValidation state changed:', codeValidation);
+    console.log('🔄 useEffect - inviteCode state:', inviteCode);
+    console.log('🔄 useEffect - joining state:', joining);
+  }, [codeValidation, inviteCode, joining]);
 
   const fetchPublicData = async () => {
     try {
@@ -105,6 +113,7 @@ export function DiscoverView() {
     switch (sport.toLowerCase()) {
       case 'squash': return '🏸';
       case 'padel': return '🎾';
+      case 'pickleball': return '🏓';
       case 'tennis': return '🎾';
       case 'badminton': return '🏸';
       default: return '🏆';
@@ -121,11 +130,14 @@ export function DiscoverView() {
   };
 
   const validateInviteCode = async (code: string) => {
+    console.log('🔍 validateInviteCode called with:', code);
     if (code.length !== 5) {
+      console.log('❌ Code length not 5, setting validation to null');
       setCodeValidation(null);
       return;
     }
 
+    console.log('⏳ Starting validation...');
     setValidatingCode(true);
     try {
       const response = await fetch('/api/validate-invite-code', {
@@ -137,123 +149,93 @@ export function DiscoverView() {
       });
 
       const data = await response.json();
+      console.log('✅ Validation response:', data);
+      console.log('📝 Setting codeValidation to:', data);
       setCodeValidation(data);
+      console.log('📋 After setCodeValidation call, local data:', data);
+
+      // Add a small delay to see if state updates
+      setTimeout(() => {
+        console.log('🕐 After timeout - current codeValidation state should be updated');
+      }, 100);
     } catch (error) {
-      console.error('Error validating invite code:', error);
+      console.error('❌ Error validating invite code:', error);
       setCodeValidation({ valid: false, error: 'Failed to validate code' });
     } finally {
       setValidatingCode(false);
     }
   };
 
+  // Create a component for the modal content so it can re-render
+  const JoinCodeModalContent = () => {
+    return (
+      <div className="space-y-4">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto bg-gradient-to-r from-green-500 to-blue-500 rounded-2xl flex items-center justify-center mb-4">
+            <Hash className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-white/80 mb-6">
+            Enter the 5-digit invite code to join a tournament or league
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-white/90 mb-2">
+              Invite Code
+            </label>
+            <input
+              type="text"
+              placeholder="Enter 5-digit code"
+              value={inviteCode}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, '').slice(0, 5);
+                console.log('🎯 Input onChange - Setting inviteCode to:', value);
+                setInviteCode(value);
+              }}
+              className="w-full px-4 py-3 text-center font-mono text-lg tracking-wider rounded-xl text-white placeholder:text-white/60 focus:ring-2 focus:ring-blue-500/50 focus:outline-none transition-all duration-300 bg-white/20 border-2 border-white/40"
+              maxLength={5}
+              autoFocus
+              style={{
+                color: 'white',
+              }}
+            />
+
+          </div>
+
+          <button
+            onClick={() => {
+              console.log('🔥 Join button clicked!');
+              handleJoinWithCode();
+            }}
+            disabled={joining || inviteCode.length !== 5}
+            className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 text-white py-3 rounded-xl font-medium"
+          >
+            {joining ? 'Joining...' : 'Join'}
+          </button>
+
+        </div>
+      </div>
+    );
+  };
+
   const showJoinCodeModal = () => {
     // Reset invite code when opening modal
     setInviteCode('');
     setCodeValidation(null);
-    
-    showModal({
-      title: "Join with Invite Code",
-      type: "custom",
-      content: (
-        <div className="space-y-4">
-          <div className="text-center">
-            <div className="w-16 h-16 mx-auto bg-gradient-to-r from-green-500 to-blue-500 rounded-2xl flex items-center justify-center mb-4">
-              <Hash className="w-8 h-8 text-white" />
-            </div>
-            <p className="text-white/80 mb-6">
-              Enter the 5-digit invite code to join a tournament or league
-            </p>
-          </div>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-white/90 mb-2">
-                Invite Code
-              </label>
-              <input
-                type="text"
-                placeholder="Enter 5-digit code"
-                defaultValue=""
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '').slice(0, 5);
-                  setInviteCode(value);
-                  e.target.value = value; // Update the input value directly
-                  
-                  // Validate code in real-time
-                  if (value.length === 5) {
-                    validateInviteCode(value);
-                  } else {
-                    setCodeValidation(null);
-                  }
-                }}
-                className={`w-full px-4 py-3 text-center font-mono text-lg tracking-wider rounded-xl text-white placeholder:text-white/60 focus:ring-2 focus:ring-blue-500/50 focus:outline-none transition-all duration-300 ${
-                  codeValidation?.valid 
-                    ? 'bg-green-500/20 border-2 border-green-500/50' 
-                    : codeValidation?.valid === false 
-                    ? 'bg-red-500/20 border-2 border-red-500/50' 
-                    : 'bg-white/20 border-2 border-white/40'
-                }`}
-                maxLength={5}
-                autoFocus
-                style={{
-                  color: 'white',
-                }}
-              />
-              
-              {/* Validation Status */}
-              {validatingCode && (
-                <div className="flex items-center justify-center mt-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span className="text-white/70 text-sm ml-2">Validating...</span>
-                </div>
-              )}
-              
-              {codeValidation && !validatingCode && (
-                <div className={`mt-2 p-3 rounded-xl ${
-                  codeValidation.valid 
-                    ? 'bg-green-500/20 border border-green-500/30' 
-                    : 'bg-red-500/20 border border-red-500/30'
-                }`}>
-                  {codeValidation.valid ? (
-                    <div className="text-center">
-                      <div className="flex items-center justify-center space-x-2 text-green-400 mb-1">
-                        <CheckCircle className="w-4 h-4" />
-                        <span className="font-semibold">Valid Code!</span>
-                      </div>
-                      <p className="text-white/80 text-sm">
-                        {codeValidation.type === 'tournament' ? '🏆' : '🏆'} {codeValidation.data?.name}
-                      </p>
-                      {codeValidation.data?.is_full && (
-                        <p className="text-yellow-400 text-xs mt-1">⚠️ This {codeValidation.type} is full</p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center space-x-2 text-red-400">
-                      <X className="w-4 h-4" />
-                      <span className="text-sm">{codeValidation.error}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-            
-            <Button
-              onClick={handleJoinWithCode}
-              disabled={joining || !codeValidation?.valid || codeValidation?.data?.is_full}
-              className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 text-white py-3 rounded-xl"
-            >
-              {joining ? 'Joining...' : 'Join'}
-            </Button>
-          </div>
-        </div>
-      ),
-      showCloseButton: true,
-    });
+    setIsModalOpen(true);
   };
 
   const handleJoinWithCode = async () => {
+    console.log('🚀 handleJoinWithCode called');
+
     if (!inviteCode.trim()) {
       showToast({ type: "error", title: "Please enter an invite code" });
+      return;
+    }
+
+    if (inviteCode.length !== 5) {
+      showToast({ type: "error", title: "Please enter a 5-digit invite code" });
       return;
     }
 
@@ -270,9 +252,9 @@ export function DiscoverView() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        showToast({ 
-          type: "success", 
-          title: data.message || "Successfully joined!" 
+        showToast({
+          type: "success",
+          title: data.message || "Successfully joined!"
         });
 
         // Redirect to the appropriate page
@@ -282,16 +264,16 @@ export function DiscoverView() {
           window.location.href = `/leagues/${data.data.league_id}`;
         }
       } else {
-        showToast({ 
-          type: "error", 
-          title: data.error || "Invalid invite code" 
+        showToast({
+          type: "error",
+          title: data.error || "Invalid invite code"
         });
       }
     } catch (error) {
-      console.error('Error joining with code:', error);
-      showToast({ 
-        type: "error", 
-        title: "An unexpected error occurred" 
+      console.error('❌ Error joining with code:', error);
+      showToast({
+        type: "error",
+        title: "An unexpected error occurred"
       });
     } finally {
       setJoining(false);
@@ -323,7 +305,7 @@ export function DiscoverView() {
 
 
         <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
-          {['all', 'squash', 'padel', 'tennis', 'badminton'].map((sport) => (
+          {['all', 'squash', 'padel', 'pickleball', 'tennis', 'badminton'].map((sport) => (
             <button
               key={sport}
               onClick={() => setSportFilter(sport)}
@@ -382,6 +364,41 @@ export function DiscoverView() {
           <span className="font-medium">Join with Code</span>
         </button>
       </div>
+
+
+      {/* Custom Join Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 max-w-md w-full relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10 rounded-3xl"></div>
+
+            <div className="relative z-10 p-6">
+              {/* Header */}
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-lg border border-white/20">
+                    <Hash className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Join with Invite Code</h3>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-200 border border-white/20"
+                >
+                  <X className="w-4 h-4 text-white/80" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="mb-6">
+                <JoinCodeModalContent />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Content List */}
       {(filteredLeagues.length === 0 && filteredTournaments.length === 0) ? (

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/blocks/button";
 import { Input } from "@/blocks/input";
-import { Plus, Trash2, User, Mail, Phone, Users } from "lucide-react";
+import { Plus, Trash2, User, Users } from "lucide-react";
 import { LoadingSpinner } from "@/components/loading-spinner";
 
 interface GuestPlayer {
@@ -31,8 +31,6 @@ export function GuestPlayerManager({ leagueId, maxPlayers, currentPlayers }: Gue
   const [showAddForm, setShowAddForm] = useState(false);
   const [newGuest, setNewGuest] = useState({
     name: "",
-    email: "",
-    phone: "",
   });
 
   // Fetch participants
@@ -73,15 +71,13 @@ export function GuestPlayerManager({ leagueId, maxPlayers, currentPlayers }: Gue
         },
         body: JSON.stringify({
           name: newGuest.name.trim(),
-          email: newGuest.email.trim() || null,
-          phone: newGuest.phone.trim() || null,
         }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        setNewGuest({ name: "", email: "", phone: "" });
+        setNewGuest({ name: "" });
         setShowAddForm(false);
         await fetchParticipants(); // Refresh the list
       } else {
@@ -176,36 +172,6 @@ export function GuestPlayerManager({ leagueId, maxPlayers, currentPlayers }: Gue
                 />
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email (Optional)
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="email"
-                  placeholder="guest@example.com"
-                  value={newGuest.email}
-                  onChange={(e) => setNewGuest({ ...newGuest, email: e.target.value })}
-                  className="pl-10 w-full h-10 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone (Optional)
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="tel"
-                  placeholder="+1234567890"
-                  value={newGuest.phone}
-                  onChange={(e) => setNewGuest({ ...newGuest, phone: e.target.value })}
-                  className="pl-10 w-full h-10 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
-                />
-              </div>
-            </div>
           </div>
           <div className="flex space-x-3">
             <Button
@@ -222,7 +188,7 @@ export function GuestPlayerManager({ leagueId, maxPlayers, currentPlayers }: Gue
             <Button
               onClick={() => {
                 setShowAddForm(false);
-                setNewGuest({ name: "", email: "", phone: "" });
+                setNewGuest({ name: "" });
               }}
               className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg"
             >

@@ -110,8 +110,8 @@ BEGIN
     RETURNING id INTO v_guest_id;
     
     -- Add guest player as participant
-    INSERT INTO public.tournament_players (tournament_id, guest_player_id, status)
-    VALUES (p_tournament_id, v_guest_id, 'confirmed');
+    INSERT INTO public.tournament_players (tournament_id, guest_player_id)
+    VALUES (p_tournament_id, v_guest_id);
     
     -- Update tournament player count
     UPDATE public.tournaments 

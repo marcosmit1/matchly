@@ -1,4 +1,5 @@
 import { createClient } from "@/supabase/server";
+import { createClient as createServiceClient } from "@/supabase/service";
 import { NextRequest, NextResponse } from "next/server";
 
 // GET: Fetch all guest players for a league
@@ -18,29 +19,11 @@ export async function GET(
 
     const { leagueId } = await params;
 
-    // Get all participants including guests
+    // Get all participants first
     const { data: participants, error } = await supabase
       .from("league_participants")
-      .select(`
-        id,
-        user_id,
-        guest_player_id,
-        status,
-        joined_at,
-        users!league_participants_user_id_fkey(
-          id,
-          email,
-          raw_user_meta_data
-        ),
-        guest_players!league_participants_guest_player_id_fkey(
-          id,
-          name,
-          email,
-          phone
-        )
-      `)
-      .eq("league_id", leagueId)
-      .eq("status", "confirmed");
+      .select("id, user_id, guest_player_id, status, joined_at")
+      .eq("league_id", leagueId);
 
     if (error) {
       console.error("Error fetching participants:", error);
@@ -50,22 +33,44 @@ export async function GET(
       );
     }
 
+    // Get user and guest player details separately
+    const userIds = participants?.filter(p => p.user_id).map(p => p.user_id) || [];
+    const guestPlayerIds = participants?.filter(p => p.guest_player_id).map(p => p.guest_player_id) || [];
+
+    // Fetch user details using service client to bypass RLS
+    const serviceSupabase = await createServiceClient();
+    const { data: users } = userIds.length > 0
+      ? await serviceSupabase.from("users").select("id, username, email").in("id", userIds)
+      : { data: [] };
+
+    // Fetch guest player details
+    const { data: guestPlayers } = guestPlayerIds.length > 0
+      ? await supabase.from("guest_players").select("id, name, email, phone").in("id", guestPlayerIds)
+      : { data: [] };
+
+    // Create lookup maps
+    const userMap = new Map(users?.map(u => [u.id, u]) || []);
+    const guestMap = new Map(guestPlayers?.map(g => [g.id, g]) || []);
+
     // Format participants data
-    const formattedParticipants = participants?.map(participant => ({
-      participant_id: participant.id,
-      user_id: participant.user_id,
-      guest_player_id: participant.guest_player_id,
-      name: participant.user_id 
-        ? ((participant.users as any)?.raw_user_meta_data?.username || (participant.users as any)?.email)
-        : (participant.guest_players as any)?.name,
-      email: participant.user_id 
-        ? (participant.users as any)?.email
-        : (participant.guest_players as any)?.email,
-      phone: (participant.guest_players as any)?.phone,
-      status: participant.status,
-      is_guest: !!participant.guest_player_id,
-      joined_at: participant.joined_at
-    })) || [];
+    const formattedParticipants = participants?.map(participant => {
+      const user = participant.user_id ? userMap.get(participant.user_id) : null;
+      const guest = participant.guest_player_id ? guestMap.get(participant.guest_player_id) : null;
+
+      return {
+        participant_id: participant.id,
+        user_id: participant.user_id,
+        guest_player_id: participant.guest_player_id,
+        name: user
+          ? ((user.username || user.email)?.charAt(0).toUpperCase() + (user.username || user.email)?.slice(1))
+          : (guest?.name?.charAt(0).toUpperCase() + guest?.name?.slice(1)) || "Unknown",
+        email: user?.email || guest?.email || null,
+        phone: guest?.phone || null,
+        status: participant.status,
+        is_guest: !!participant.guest_player_id,
+        joined_at: participant.joined_at
+      };
+    }) || [];
 
     return NextResponse.json({
       success: true,
@@ -97,7 +102,7 @@ export async function POST(
 
     const { leagueId } = await params;
     const body = await request.json();
-    const { name, email, phone } = body;
+    const { name } = body;
 
     // Validate required fields
     if (!name || name.trim().length === 0) {
@@ -107,12 +112,10 @@ export async function POST(
       );
     }
 
-    // Add guest player using database function
+    // Add guest player using database function (name only, like tournaments)
     const { data, error } = await supabase.rpc("add_guest_player_to_league", {
       p_league_id: leagueId,
       p_name: name.trim(),
-      p_email: email?.trim() || null,
-      p_phone: phone?.trim() || null,
     });
 
     if (error) {

@@ -74,18 +74,32 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
   }, [currentUser, tournament.id]);
 
   const fetchParticipants = async () => {
+    console.log('🚀 NEW DEBUG: fetchParticipants function called!');
     try {
+      console.log('🔍 Fetching participants for tournament:', tournament.id);
       const response = await fetch(`/api/tournaments/${tournament.id}/players`);
+      console.log('📊 Response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ API response not ok:', response.status, errorText);
+        throw new Error(`Failed to fetch participants: ${response.status} ${errorText}`);
+      }
+
       const data = await response.json();
+      console.log('📋 Participants data received:', data);
       setParticipants(data.players || []);
-      
+
       // Check if current user is a participant
       if (currentUser) {
+        console.log('👤 Checking if current user is participant:', currentUser.id);
+        console.log('👥 Players list:', data.players);
         const userIsParticipant = data.players?.some((player: any) => player.created_by === currentUser.id);
+        console.log('✅ User is participant:', userIsParticipant);
         setIsParticipant(userIsParticipant);
       }
     } catch (error) {
-      console.error('Error fetching participants:', error);
+      console.error('❌ Error fetching participants:', error);
     } finally {
       setLoading(false);
     }
@@ -352,9 +366,11 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
   const getSportIcon = (sport: string) => {
     switch (sport) {
       case 'padel':
-        return '🏓';
+        return '🎾';
       case 'squash':
         return '🏸';
+      case 'pickleball':
+        return '🏓';
       case 'tennis':
         return '🎾';
       case 'badminton':

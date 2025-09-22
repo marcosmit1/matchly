@@ -81,6 +81,7 @@ export function MyLeaguesList() {
     switch (sport) {
       case "squash": return "🏸";
       case "padel": return "🎾";
+      case "pickleball": return "🏓";
       default: return "🏆";
     }
   };

@@ -9,7 +9,8 @@ Matchly is a modern tournament management app built with Next.js, Supabase, and 
 ## Development Commands
 
 ### Essential Commands
-- `npm run dev` - Start development server with Turbopack
+All commands should be run from the `/web` directory:
+- `npm run dev` - Start development server with Turbopack on http://localhost:3000
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
@@ -32,12 +33,18 @@ Matchly is a modern tournament management app built with Next.js, Supabase, and 
 
 ### Directory Structure
 - `/src/app/` - Next.js App Router pages and API routes
-- `/src/components/` - Reusable React components
+  - `/src/app/(app)/` - Main application pages (discover, tournaments, leagues, etc.)
+  - `/src/app/api/` - API routes for backend functionality
+  - `/src/app/auth/` - Authentication related pages
+- `/src/components/` - Reusable React components organized by feature
 - `/src/blocks/` - Core UI building blocks (drawer, button, input)
 - `/src/lib/` - Utility libraries and services
 - `/src/types/` - TypeScript type definitions
 - `/src/supabase/` - Supabase client configuration
 - `/src/schema/` - Database schema files and migrations
+- `/src/contexts/` - React Context providers (modal management)
+- `/src/hooks/` - Custom React hooks
+- `/src/utils/` - Utility functions
 
 ### Key Features
 
@@ -89,9 +96,10 @@ Matchly is a modern tournament management app built with Next.js, Supabase, and 
 4. Database changes require SQL migration files
 
 ### Database Modifications
-- SQL migration files are stored in the root directory
+- SQL migration files are stored in the `/web` directory (root level of the web project)
 - Use descriptive filenames with dates (e.g., `add_tournament_guest_players.sql`)
 - Test migrations thoroughly as they affect production data
+- Current schema includes complex relationships for tournaments, leagues, matches, bookings, and guest player systems
 
 ### Styling Guidelines
 - Use Tailwind CSS classes consistently

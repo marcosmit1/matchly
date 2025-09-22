@@ -81,6 +81,12 @@ const SPORTS: Sport[] = [
     name: "Padel",
     icon: "🎾",
     description: "Racquet sport combining tennis and squash elements"
+  },
+  {
+    id: "pickleball",
+    name: "Pickleball",
+    icon: "🏓",
+    description: "Fast-growing paddle sport played on a badminton-sized court"
   }
 ];
 

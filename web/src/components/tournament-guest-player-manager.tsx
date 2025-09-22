@@ -37,8 +37,6 @@ export function TournamentGuestPlayerManager({
   const [addingGuest, setAddingGuest] = useState(false);
   const [newGuest, setNewGuest] = useState({
     name: "",
-    email: "",
-    phone: "",
   });
   const { showModal } = useModal();
 
@@ -83,15 +81,13 @@ export function TournamentGuestPlayerManager({
         },
         body: JSON.stringify({
           name: newGuest.name.trim(),
-          email: newGuest.email.trim() || null,
-          phone: newGuest.phone.trim() || null,
         }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        setNewGuest({ name: "", email: "", phone: "" });
+        setNewGuest({ name: "" });
         setShowAddForm(false);
         await fetchParticipants(); // Refresh the list
         showModal({
@@ -171,100 +167,75 @@ export function TournamentGuestPlayerManager({
       {/* Add Guest Player Button */}
       {canAddMore && (
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-white">Guest Players</h3>
-          <Button
+          <h3 className="text-lg font-semibold text-gray-900">Guest Players</h3>
+          <button
             onClick={() => setShowAddForm(true)}
-            className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-4 py-2 rounded-xl flex items-center space-x-2"
+            className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-4 py-2 rounded-xl flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
           >
             <Plus className="w-4 h-4" />
             <span>Add Guest</span>
-          </Button>
+          </button>
         </div>
       )}
 
       {/* Add Guest Player Form */}
       {showAddForm && (
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20">
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
-            <h4 className="text-lg font-semibold text-white">Add Guest Player</h4>
-            <Button
+            <div className="flex items-center space-x-3">
+              <div className="text-2xl">👤</div>
+              <h4 className="font-semibold text-gray-900">Add Guest Player</h4>
+            </div>
+            <button
               onClick={() => setShowAddForm(false)}
-              className="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center"
+              className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-all duration-200"
             >
-              <X className="w-4 h-4 text-white" />
-            </Button>
+              <X className="w-4 h-4 text-gray-600" />
+            </button>
           </div>
-          
+
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-white/90 mb-2">
-                Name *
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Guest Player Name
               </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/70" />
-                <Input
-                  type="text"
-                  placeholder="Enter guest player name"
-                  value={newGuest.name}
-                  onChange={(e) => setNewGuest({ ...newGuest, name: e.target.value })}
-                  className="pl-12 w-full h-12 border border-white/30 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 bg-black/20 backdrop-blur-md transition-all duration-300 text-white placeholder:text-white/80 shadow-inner"
-                />
-              </div>
+              <input
+                type="text"
+                placeholder="Enter guest player name"
+                value={newGuest.name}
+                onChange={(e) => setNewGuest({ ...newGuest, name: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                autoFocus
+              />
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-white/90 mb-2">
-                Email (Optional)
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/70" />
-                <Input
-                  type="email"
-                  placeholder="Enter email address"
-                  value={newGuest.email}
-                  onChange={(e) => setNewGuest({ ...newGuest, email: e.target.value })}
-                  className="pl-12 w-full h-12 border border-white/30 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 bg-black/20 backdrop-blur-md transition-all duration-300 text-white placeholder:text-white/80 shadow-inner"
-                />
-              </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <p className="text-sm text-blue-800">
+                💡 <strong>Note:</strong> This is for guest players only. If someone has an account, they should join using the tournament invite code from their own device.
+              </p>
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-white/90 mb-2">
-                Phone (Optional)
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/70" />
-                <Input
-                  type="tel"
-                  placeholder="Enter phone number"
-                  value={newGuest.phone}
-                  onChange={(e) => setNewGuest({ ...newGuest, phone: e.target.value })}
-                  className="pl-12 w-full h-12 border border-white/30 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 bg-black/20 backdrop-blur-md transition-all duration-300 text-white placeholder:text-white/80 shadow-inner"
-                />
-              </div>
-            </div>
-            
+
             <div className="flex space-x-3">
-              <Button
+              <button
                 onClick={() => setShowAddForm(false)}
-                className="flex-1 px-4 py-3 border border-white/30 text-white/80 rounded-2xl hover:bg-white/10 transition-all duration-300 backdrop-blur-md font-medium"
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-300 font-medium"
               >
                 Cancel
-              </Button>
-              <Button
+              </button>
+              <button
                 onClick={addGuestPlayer}
                 disabled={addingGuest || !newGuest.name.trim()}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
               >
                 {addingGuest ? (
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center justify-center space-x-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                     <span>Adding...</span>
                   </div>
                 ) : (
                   "Add Guest Player"
                 )}
-              </Button>
+              </button>
             </div>
           </div>
         </div>
@@ -273,40 +244,25 @@ export function TournamentGuestPlayerManager({
       {/* Guest Players List */}
       {guestPlayers.length > 0 && (
         <div className="space-y-3">
-          <h4 className="text-md font-semibold text-white/90">Guest Players ({guestPlayers.length})</h4>
+          <h4 className="text-md font-semibold text-gray-900">Guest Players ({guestPlayers.length})</h4>
           {guestPlayers.map((guest) => (
             <div
               key={guest.id}
-              className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/20 flex items-center justify-between"
+              className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 flex items-center justify-between"
             >
-              <div className="flex-1">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-xl flex items-center justify-center">
-                    <User className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h5 className="font-semibold text-white">{guest.name}</h5>
-                    {guest.email && (
-                      <p className="text-sm text-white/70 flex items-center space-x-1">
-                        <Mail className="w-3 h-3" />
-                        <span>{guest.email}</span>
-                      </p>
-                    )}
-                    {guest.phone && (
-                      <p className="text-sm text-white/70 flex items-center space-x-1">
-                        <Phone className="w-3 h-3" />
-                        <span>{guest.phone}</span>
-                      </p>
-                    )}
-                  </div>
+              <div className="flex items-center space-x-3">
+                <div className="text-2xl">👤</div>
+                <div>
+                  <h5 className="font-semibold text-gray-900">{guest.name}</h5>
+                  <p className="text-sm text-gray-600">Guest Player</p>
                 </div>
               </div>
-              <Button
+              <button
                 onClick={() => removeGuestPlayer(guest.guest_player_id!)}
-                className="w-8 h-8 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg flex items-center justify-center transition-all duration-200"
+                className="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg flex items-center justify-center transition-all duration-200"
               >
                 <Trash2 className="w-4 h-4" />
-              </Button>
+              </button>
             </div>
           ))}
         </div>

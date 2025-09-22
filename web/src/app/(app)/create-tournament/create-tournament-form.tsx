@@ -172,6 +172,7 @@ export function CreateTournamentForm() {
                 >
                   <option value="padel">Padel</option>
                   <option value="squash">Squash</option>
+                  <option value="pickleball">Pickleball</option>
                   <option value="tennis">Tennis</option>
                   <option value="badminton">Badminton</option>
                 </select>

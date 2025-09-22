@@ -87,6 +87,7 @@ export function LeaguesList() {
     switch (sport) {
       case "squash": return "🏸";
       case "padel": return "🎾";
+      case "pickleball": return "🏓";
       default: return "🏆";
     }
   };
@@ -168,6 +169,7 @@ export function LeaguesList() {
             <option value="all">All Sports</option>
             <option value="squash">Squash</option>
             <option value="padel">Padel</option>
+            <option value="pickleball">Pickleball</option>
           </select>
         </div>
       </div>
