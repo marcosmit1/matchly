@@ -192,8 +192,7 @@ export async function GET(
             joined_at: new Date().toISOString(),
             user: worstScore.participant.user && Array.isArray(worstScore.participant.user) && worstScore.participant.user.length > 0 ? {
               id: worstScore.participant.user[0].id,
-              email: worstScore.participant.user[0].email,
-              raw_user_meta_data: worstScore.participant.user[0].raw_user_meta_data
+              email: worstScore.participant.user[0].email
             } : undefined
           },
           score: worstScore.score,
@@ -348,11 +347,10 @@ export async function GET(
               fourball_number: participant.fourball_number,
               status: 'active' as const,
               joined_at: new Date().toISOString(),
-              user: participant.user && Array.isArray(participant.user) && participant.user.length > 0 ? {
-                id: participant.user[0].id,
-                email: participant.user[0].email,
-                raw_user_meta_data: participant.user[0].raw_user_meta_data
-              } : undefined
+                user: participant.user && Array.isArray(participant.user) && participant.user.length > 0 ? {
+                  id: participant.user[0].id,
+                  email: participant.user[0].email
+                } : undefined
             }, 
             count: birdieLeader.birdies 
           };
@@ -377,11 +375,10 @@ export async function GET(
               fourball_number: participant.fourball_number,
               status: 'active' as const,
               joined_at: new Date().toISOString(),
-              user: participant.user && Array.isArray(participant.user) && participant.user.length > 0 ? {
-                id: participant.user[0].id,
-                email: participant.user[0].email,
-                raw_user_meta_data: participant.user[0].raw_user_meta_data
-              } : undefined
+                user: participant.user && Array.isArray(participant.user) && participant.user.length > 0 ? {
+                  id: participant.user[0].id,
+                  email: participant.user[0].email
+                } : undefined
             }, 
             count: eagleLeader.eagles 
           };
