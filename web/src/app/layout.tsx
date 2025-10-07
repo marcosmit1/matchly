@@ -13,11 +13,28 @@ export const metadata: Metadata = {
 
 // Prevent page reload on visibility change
 const preventReload = `
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').then(registration => {
+      console.log('ServiceWorker registration successful');
+    }).catch(err => {
+      console.log('ServiceWorker registration failed: ', err);
+    });
+  }
+
+  // Handle visibility changes
   let lastHidden = false;
   document.addEventListener('visibilitychange', () => {
     // Only prevent reload if we're coming back to the page
     if (document.visibilityState === 'visible' && lastHidden) {
       event.preventDefault();
+      // Notify service worker
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'VISIBILITY_CHANGE',
+          state: 'visible'
+        });
+      }
     }
     lastHidden = document.visibilityState === 'hidden';
   });
