@@ -31,11 +31,11 @@ export async function SEND_GAME_INVITE_NOTIFICATIONS(
     // Create notification payload - different for tournaments vs games
     const payload: PUSH_NOTIFICATION_PAYLOAD = options?.isTournament ? {
       title: "🏆 Tournament Invite!",
-      body: `${creatorName} invited you to join the "${options.tournamentName || 'Beer Pong Tournament'}"! Ready to compete?`,
+      body: `${creatorName} invited you to join the "${options.tournamentName || 'Tournament'}"! Ready to compete?`,
       url: `/game/tournament/view?id=${gameId}`,
     } : {
-      title: "🏓 Beer Pong Game Invite!",
-      body: `${creatorName} invited you to play Beer Pong! Ready to sink some cups?`,
+      title: "🏓 Game Invite!",
+      body: `${creatorName} invited you to play! Ready to compete?`,
       url: `/game/${gameId}`,
     };
 

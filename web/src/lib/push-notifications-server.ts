@@ -27,7 +27,7 @@ export interface PUSH_NOTIFICATION_PAYLOAD {
 export function INITIALIZE_WEB_PUSH() {
   const vapidPublicKey = process.env.WEB_PUSH_PUBLIC_VAPID_KEY;
   const vapidPrivateKey = process.env.WEB_PUSH_PRIVATE_VAPID_KEY;
-  const vapidSubject = process.env.VAPID_SUBJECT || "mailto:admin@pongbros.co.za";
+  const vapidSubject = process.env.VAPID_SUBJECT || "mailto:admin@matchly.app";
 
   if (!vapidPublicKey || !vapidPrivateKey) {
     console.error("VAPID keys not configured");

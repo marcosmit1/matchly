@@ -295,7 +295,7 @@ export default function TournamentSetup({ user }: { user: USER }) {
         <Button
           disabled={!canStart || isCreating}
           className={`h-[50px] w-full py-3 ${!canStart || isCreating ? "opacity-50 cursor-not-allowed" : "active:scale-95"}`}
-          variant="pongbros-primary"
+          variant="default"
           onClick={async () => {
             if (isCreating) return;
             

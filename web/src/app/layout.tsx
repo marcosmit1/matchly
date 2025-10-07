@@ -11,6 +11,18 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
 };
 
+// Prevent page reload on visibility change
+const preventReload = `
+  let lastHidden = false;
+  document.addEventListener('visibilitychange', () => {
+    // Only prevent reload if we're coming back to the page
+    if (document.visibilityState === 'visible' && lastHidden) {
+      event.preventDefault();
+    }
+    lastHidden = document.visibilityState === 'hidden';
+  });
+`;
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -20,6 +32,14 @@ export default async function RootLayout({
     <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <script dangerouslySetInnerHTML={{ __html: preventReload }} />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111827" />
+        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#111827" />
+        <meta name="apple-mobile-web-app-title" content="Matchly" />
+        <meta name="apple-touch-fullscreen" content="yes" />
         <meta name="theme-color" content="#2563EB" />
         <meta name="msapplication-navbutton-color" content="#2563EB" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />

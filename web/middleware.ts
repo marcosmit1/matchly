@@ -2,6 +2,13 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  console.log('🚀 Middleware triggered:', {
+    path: request.nextUrl.pathname,
+    method: request.method,
+    isHtmlRequest: request.headers.get('accept')?.includes('text/html'),
+    isApiRequest: request.nextUrl.pathname.startsWith('/api'),
+  });
+
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -12,9 +19,12 @@ export async function middleware(request: NextRequest) {
     {
       cookies: {
         getAll() {
-          return request.cookies.getAll()
+          const cookies = request.cookies.getAll();
+          console.log('🍪 Getting cookies:', cookies.length);
+          return cookies;
         },
         setAll(cookiesToSet) {
+          console.log('🍪 Setting cookies:', cookiesToSet.length);
           cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
@@ -35,25 +45,40 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Protected routes that require authentication
-  if (request.nextUrl.pathname.startsWith('/leagues') || 
-      request.nextUrl.pathname.startsWith('/create-league') ||
-      request.nextUrl.pathname.startsWith('/discover') ||
-      request.nextUrl.pathname.startsWith('/account')) {
-    
-    if (!user) {
-      // User is not authenticated, redirect to login
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
-    }
+  // Skip middleware for Next.js internal routes and static files
+  if (
+    request.nextUrl.pathname.startsWith('/_next') ||
+    request.nextUrl.pathname.startsWith('/static') ||
+    request.nextUrl.pathname.includes('.') // Skip files with extensions
+  ) {
+    return supabaseResponse;
   }
 
-  // If user is authenticated and trying to access login page, redirect to home
-  if (user && request.nextUrl.pathname === '/login') {
-    const url = request.nextUrl.clone()
-    url.pathname = '/'
-    return NextResponse.redirect(url)
+  // Handle login page specially
+  if (request.nextUrl.pathname === '/login') {
+    // Only redirect if user is authenticated
+    if (user) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/'
+      return NextResponse.redirect(url)
+    }
+    return supabaseResponse;
+  }
+
+  // Handle API routes
+  if (request.nextUrl.pathname.startsWith('/api')) {
+    return supabaseResponse;
+  }
+
+  // For all other routes, require authentication
+  if (!user) {
+    // Only redirect to login if it's a page request
+    if (request.headers.get('accept')?.includes('text/html')) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      url.searchParams.set('returnUrl', request.nextUrl.pathname)
+      return NextResponse.redirect(url)
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're

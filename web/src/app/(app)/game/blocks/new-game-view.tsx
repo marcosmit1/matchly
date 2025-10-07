@@ -182,7 +182,7 @@ export function NEW_GAME_VIEW({ user }: NEW_GAME_VIEW_PROPS) {
           className={`h-[50px] w-full py-3 ${
             team1players.length === 0 || team2players.length === 0 || isstartinggame ? "opacity-50 cursor-not-allowed" : "active:scale-95"
           }`}
-          variant="pongbros-primary"
+          variant="default"
         >
           {isstartinggame ? "Starting Game..." : "Start Game"}
         </Button>

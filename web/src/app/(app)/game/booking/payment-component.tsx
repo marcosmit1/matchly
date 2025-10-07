@@ -135,7 +135,7 @@ export function PaymentComponent({
         onClick={handlePayment}
         disabled={loading || processing || !cardNumber || !expiryDate || !cvv || !cardholderName}
         className="w-full h-[50px] flex items-center justify-center gap-2 mt-6"
-        variant="pongbros-primary"
+        variant="default"
       >
         <CreditCard size={20} />
         {processing ? "Processing..." : `Pay $${amount}`}

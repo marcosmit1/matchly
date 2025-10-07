@@ -346,7 +346,7 @@ export function BookingFlow({ venueId, user, onBookingComplete }: BookingFlowPro
           <Button
             onClick={onBookingComplete}
             className="w-full max-w-sm h-[45px]"
-            variant="pongbros-primary"
+            variant="default"
           >
             Continue
           </Button>
@@ -472,7 +472,7 @@ export function BookingFlow({ venueId, user, onBookingComplete }: BookingFlowPro
             onClick={handleProceedToPayment}
             disabled={!selectedDate || !selectedTime}
             className="w-full h-[50px] flex items-center justify-center gap-2"
-            variant="pongbros-primary"
+            variant="default"
           >
             <CreditCard size={20} />
             Proceed to Payment

@@ -126,7 +126,7 @@ export function BookingsView({ user }: BookingsViewProps) {
                               <p className="text-white/70 mb-6">You haven&apos;t made any table reservations.</p>
               <Button
                 onClick={() => router.push("/game")}
-                variant="pongbros-primary"
+                variant="default"
                 className="h-[45px]"
               >
                 Book a Table

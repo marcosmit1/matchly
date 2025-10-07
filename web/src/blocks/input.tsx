@@ -10,8 +10,6 @@ const inputVariants = cva(
       variant: {
         default:
           "dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-        pongbros:
-          "border-none focus-visible:ring-0 focus-visible:ring-offset-0 !bg-transparent text-[#FBF0D6] placeholder:text-[rgba(251,240,214,0.6)] rounded-[0.25rem]",
       },
     },
     defaultVariants: {

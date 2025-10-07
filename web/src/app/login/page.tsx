@@ -27,29 +27,33 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const returnUrl = searchParams.get('returnUrl') || '/';
 
-  // Check if user is already authenticated
+  // Listen for auth state changes
   useEffect(() => {
-    const checkAuth = async () => {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
+    let ignore = false;
+    const supabase = createClient();
+    console.log('🔄 Setting up auth listener');
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: any) => {
+      console.log('🔐 Auth state changed:', { event, hasSession: !!session });
       
-      if (session) {
-        // User is already authenticated, redirect to return URL or home
-        router.push(returnUrl);
-      }
-    };
-
-    checkAuth();
-
-    // Listen for auth state changes
-    const { data: { subscription } } = createClient().auth.onAuthStateChange((event: string, session: any) => {
-      if (event === 'SIGNED_IN' && session) {
-        // User just signed in (e.g., via email verification link), redirect to return URL or home
-        router.push(returnUrl);
+      if (!ignore && event === 'SIGNED_IN' && session) {
+        console.log('👤 User signed in, redirecting to:', returnUrl);
+        router.replace(returnUrl, { scroll: false });
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Check initial session
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('📡 Initial session check:', { hasSession: !!session });
+    };
+    checkSession();
+
+    return () => {
+      console.log('🧹 Cleaning up auth listener');
+      ignore = true;
+      subscription.unsubscribe();
+    };
   }, [router, returnUrl]);
 
   // Check for error parameters in URL
@@ -136,23 +140,29 @@ function LoginForm() {
 
   const HANDLE_VERIFY_CODE = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isloading) return; // Prevent multiple submissions
     setisloading(true);
     seterror("");
 
     try {
-      const result = await VERIFY_OTP_CODE(email, otp, returnUrl);
-      // If server action returned an error, show it and stop loading
-      if (result?.error) {
-        seterror(result.error);
-        setisloading(false);
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'email'
+      });
+
+      if (error) {
+        seterror(error.message);
+      } else if (data?.user) {
+        // Success - the router will handle the redirect via onAuthStateChange
       }
-      // On success, VERIFY_OTP_CODE will trigger a redirect and not return
     } catch (error: unknown) {
-      // Swallow Next.js redirect exceptions
       if (error instanceof Error && !error.message.includes("NEXT_REDIRECT")) {
         seterror("An unexpected error occurred. Please try again.");
-        setisloading(false);
       }
+    } finally {
+      setisloading(false);
     }
   };
 
@@ -181,24 +191,26 @@ function LoginForm() {
     seterror("");
 
     try {
-      // Now send OTP code since email is verified
-      // For existing users, this will send OTP directly
-      // For new users, this will create the account and send OTP
-      const result = await SEND_OTP_CODE(email);
-      if (result?.error) {
-        if (result.error.includes("User not found")) {
-          // User still doesn't exist, try verification email again
-          const verifyResult = await SEND_VERIFICATION_EMAIL(email);
-          if (verifyResult?.error) {
-            seterror(verifyResult.error);
-          } else {
-            seterror("Please check your email again and verify before continuing.");
-          }
-        } else {
+      // Check if user exists and is verified
+      const supabase = createClient();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (user) {
+        // User exists and is verified, move to OTP
+        setAuthState('otp');
+        const result = await SEND_OTP_CODE(email);
+        if (result?.error) {
           seterror(result.error);
+          setAuthState('verification');
         }
       } else {
-        setAuthState('otp');
+        // User doesn't exist or isn't verified, send verification again
+        const verifyResult = await SEND_VERIFICATION_EMAIL(email);
+        if (verifyResult?.error) {
+          seterror(verifyResult.error);
+        } else {
+          seterror("Please check your email and verify before continuing.");
+        }
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -305,12 +317,12 @@ function LoginForm() {
                 )}
               </Button>
               
-                <Button 
-                  onClick={HANDLE_BACK_TO_EMAIL} 
-                  className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors duration-200"
-                >
+                <button
+                onClick={HANDLE_BACK_TO_EMAIL}
+                className="text-gray-900 hover:text-gray-700 text-sm font-medium transition-colors duration-200 bg-transparent border-none cursor-pointer"
+              >
                 ← Back to email
-              </Button>
+              </button>
             </>
           )}
 
@@ -355,12 +367,12 @@ function LoginForm() {
                   )}
                 </Button>
                 
-                <Button 
-                  onClick={HANDLE_BACK_TO_EMAIL} 
-                  className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors duration-200"
+                <button
+                  onClick={HANDLE_BACK_TO_EMAIL}
+                  className="text-gray-900 hover:text-gray-700 text-sm font-medium transition-colors duration-200 bg-transparent border-none cursor-pointer"
                 >
                   ← Back to email
-                </Button>
+                </button>
               </div>
             </>
           )}

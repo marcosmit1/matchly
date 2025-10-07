@@ -17,8 +17,6 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
-        "pongbros-primary": "bg-[#f5c71b] border border-[hsla(0,0%,100%,0)] text-[#3b2600] shadow-xs",
-        "pongbros-secondary": "bg-white/10 text-[#FAD659] rounded-[0.25rem] text-sm",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

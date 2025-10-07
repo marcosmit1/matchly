@@ -82,10 +82,37 @@ export function DiscoverView() {
       const leaguesData = await leaguesResponse.json();
       setLeagues(leaguesData.leagues || []);
 
+      console.log("🎯 Fetching tournaments...");
+      
       // Fetch tournaments
       const tournamentsResponse = await fetch('/api/tournaments?public=true');
       const tournamentsData = await tournamentsResponse.json();
-      setTournaments(tournamentsData.tournaments || []);
+      console.log("📦 Regular tournaments:", tournamentsData);
+      
+      // Fetch golf tournaments
+      console.log("⛳ Fetching golf tournaments...");
+      const golfTournamentsResponse = await fetch('/api/golf-tournaments?public=true');
+      const golfTournamentsData = await golfTournamentsResponse.json();
+      console.log("🏌️ Golf tournaments response:", golfTournamentsData);
+      
+      // Combine regular and golf tournaments
+      const allTournaments = [
+        ...(tournamentsData.tournaments || []),
+        ...(golfTournamentsData.tournaments || []).map((t: any) => ({
+          ...t,
+          sport: 'golf',
+          tournament_type: t.format || 'stroke play'
+        }))
+      ];
+      
+      console.log("🔄 Combined tournaments:", allTournaments);
+      console.log("📊 Tournament counts:", {
+        regular: tournamentsData.tournaments?.length || 0,
+        golf: golfTournamentsData.tournaments?.length || 0,
+        total: allTournaments.length
+      });
+      
+      setTournaments(allTournaments);
     } catch (error) {
       console.error('Error fetching public data:', error);
     } finally {
@@ -94,38 +121,53 @@ export function DiscoverView() {
   };
 
   const filteredLeagues = leagues.filter(league => {
-    const matchesSearch = league.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         league.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (league.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                         (league.description?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     const matchesSport = sportFilter === 'all' || league.sport === sportFilter;
     const matchesType = typeFilter === 'all' || typeFilter === 'leagues';
     return matchesSearch && matchesSport && matchesType && league.status === 'open';
   });
 
   const filteredTournaments = tournaments.filter(tournament => {
-    const matchesSearch = tournament.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         tournament.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (tournament.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                         (tournament.description?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     const matchesSport = sportFilter === 'all' || tournament.sport === sportFilter;
     const matchesType = typeFilter === 'all' || typeFilter === 'tournaments';
-    return matchesSearch && matchesSport && matchesType && tournament.status === 'open';
+    // Handle both regular tournament status ('open') and golf tournament status ('setup', 'active')
+    const isAvailable = tournament.sport === 'golf' 
+      ? ['setup', 'active'].includes(tournament.status)
+      : tournament.status === 'open';
+    return matchesSearch && matchesSport && matchesType && isAvailable;
   });
 
   const getSportIcon = (sport: string) => {
-    switch (sport.toLowerCase()) {
+    switch (sport?.toLowerCase()) {
       case 'squash': return '🏸';
       case 'padel': return '🎾';
       case 'pickleball': return '🏓';
       case 'tennis': return '🎾';
       case 'badminton': return '🏸';
+      case 'golf': return '⛳';
       default: return '🏆';
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'open': return 'bg-green-100 text-green-800';
-      case 'started': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+  const getStatusColor = (status: string, sport?: string) => {
+    if (sport === 'golf') {
+      switch (status) {
+        case 'setup': return 'bg-green-100 text-green-800';
+        case 'active': return 'bg-blue-100 text-blue-800';
+        case 'completed': return 'bg-gray-100 text-gray-800';
+        case 'cancelled': return 'bg-red-100 text-red-800';
+        default: return 'bg-gray-100 text-gray-800';
+      }
+    } else {
+      switch (status) {
+        case 'open': return 'bg-green-100 text-green-800';
+        case 'started': return 'bg-blue-100 text-blue-800';
+        case 'completed': return 'bg-gray-100 text-gray-800';
+        default: return 'bg-gray-100 text-gray-800';
+      }
     }
   };
 
@@ -185,7 +227,9 @@ export function DiscoverView() {
               Invite Code
             </label>
             <input
-              type="text"
+              type="number"
+              inputMode="numeric"
+              pattern="\d*"
               placeholder="Enter 5-digit code"
               value={inviteCode}
               onChange={(e) => {
@@ -198,6 +242,9 @@ export function DiscoverView() {
               autoFocus
               style={{
                 color: 'white',
+                WebkitAppearance: 'none',
+                MozAppearance: 'textfield',
+                caretColor: 'white',
               }}
             />
 
@@ -260,6 +307,8 @@ export function DiscoverView() {
         // Redirect to the appropriate page
         if (data.type === 'tournament') {
           window.location.href = `/tournaments/${data.data.tournament_id}`;
+        } else if (data.type === 'golf_tournament') {
+          window.location.href = `/golf/${data.data.tournament_id}`;
         } else if (data.type === 'league') {
           window.location.href = `/leagues/${data.data.league_id}`;
         }
@@ -305,7 +354,7 @@ export function DiscoverView() {
 
 
         <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
-          {['all', 'squash', 'padel', 'pickleball', 'tennis', 'badminton'].map((sport) => (
+          {['all', 'golf', 'squash', 'padel', 'pickleball', 'tennis', 'badminton'].map((sport) => (
             <button
               key={sport}
               onClick={() => setSportFilter(sport)}
@@ -466,7 +515,9 @@ export function DiscoverView() {
 
           {/* Tournaments */}
           {filteredTournaments.map((tournament) => (
-            <Link key={`tournament-${tournament.id}`} href={`/tournaments/${tournament.id}`}>
+            <Link 
+              key={`tournament-${tournament.id}`} 
+              href={tournament.sport === 'golf' ? `/golf/${tournament.id}` : `/tournaments/${tournament.id}`}>
               <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
@@ -483,7 +534,7 @@ export function DiscoverView() {
                     <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">
                       {tournament.tournament_type}
                     </span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(tournament.status)}`}>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(tournament.status, tournament.sport)}`}>
                       {tournament.status}
                     </span>
                   </div>

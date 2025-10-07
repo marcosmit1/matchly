@@ -192,7 +192,7 @@ export function VenueSelection({ onVenueSelect }: VenueSelectionProps) {
               <Button
                 onClick={() => onVenueSelect(venue.id)}
                 className="w-full h-[45px]"
-                variant="pongbros-primary"
+                variant="default"
               >
                 Select This Venue
               </Button>
