@@ -22,6 +22,11 @@ import Link from "next/link";
 import { Button } from "@/blocks/button";
 import { createClient } from "@/supabase/client";
 
+interface TournamentMatch {
+  id: string;
+  status: 'pending' | 'active' | 'completed';
+}
+
 interface Tournament {
   id: string;
   name: string;
@@ -140,7 +145,7 @@ export function TournamentDetails({ tournament }: TournamentDetailsProps) {
         .from("tournament_matches")
         .select("status")
         .eq("tournament_id", tournament.id)
-        .eq("round_id", latestRound.id);
+        .eq("round_id", latestRound.id) as unknown as { data: TournamentMatch[] | null, error: any };
       
       if (error) {
         console.error('Error checking playoff matches:', error);

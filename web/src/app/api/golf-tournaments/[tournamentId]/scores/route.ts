@@ -17,7 +17,7 @@ function determineScoreType(strokes: number, par: number) {
 // POST /api/golf-tournaments/[tournamentId]/scores - Submit score for a hole
 export async function POST(
   request: Request,
-  context: { params: { tournamentId: string } }
+  context: { params: Promise<{ tournamentId: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -235,7 +235,7 @@ export async function POST(
 // GET /api/golf-tournaments/[tournamentId]/scores - Get all scores for tournament
 export async function GET(
   request: Request,
-  context: { params: { tournamentId: string } }
+  context: { params: Promise<{ tournamentId: string }> }
 ) {
   try {
     const supabase = await createClient();

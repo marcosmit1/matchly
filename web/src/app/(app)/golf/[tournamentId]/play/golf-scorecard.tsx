@@ -109,12 +109,10 @@ export function GolfScorecard({ tournament, participant, holes, existingScores }
   };
 
   const handleReportPenalty = async (penaltyType: GolfPenaltyType) => {
-    const confirmed = await showConfirm({
-      title: "Report Penalty?",
-      message: `Report ${penaltyType} penalty on hole ${currentHole}?`,
-      confirmText: "Report",
-      cancelText: "Cancel"
-    });
+    const confirmed = await showConfirm(
+      `Report ${penaltyType} penalty on hole ${currentHole}?`,
+      "Report Penalty?"
+    );
 
     if (!confirmed) return;
 

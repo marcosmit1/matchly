@@ -458,7 +458,7 @@ export function CreateTournamentForm({ sport }: CreateTournamentFormProps) {
                   ⛳ Golf Tournament Format
                 </h4>
                 <ul className="text-sm text-green-800 space-y-1">
-                  <li>• Configure each hole's par and handicap</li>
+                  <li>• Configure each hole&apos;s par and handicap</li>
                   <li>• Players grouped into fourballs (4-person groups)</li>
                   <li>• Stroke play with real-time leaderboards</li>
                   <li>• Track penalties, birdies, eagles, and more</li>

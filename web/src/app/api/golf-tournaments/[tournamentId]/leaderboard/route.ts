@@ -5,7 +5,7 @@ import type { GolfLeaderboardEntry, GolfWallOfShame, GolfHeroBoard } from '@/typ
 // GET /api/golf-tournaments/[tournamentId]/leaderboard - Get tournament leaderboard
 export async function GET(
   request: Request,
-  context: { params: { tournamentId: string } }
+  context: { params: Promise<{ tournamentId: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -45,6 +45,9 @@ export async function GET(
       );
     }
 
+    console.log('🏌️ Participants found:', participants?.length || 0);
+    console.log('🏌️ Participants data:', participants);
+
     // Get all scores for the tournament
     const { data: scores, error: scoresError } = await supabase
       .from('golf_scores')
@@ -58,6 +61,9 @@ export async function GET(
         { status: 500 }
       );
     }
+
+    console.log('🏌️ Scores found:', scores?.length || 0);
+    console.log('🏌️ Scores data:', scores);
 
     // Get all holes for par calculation
     const { data: holes, error: holesError } = await supabase
@@ -118,7 +124,10 @@ export async function GET(
         penalties: participantPenalties.length,
         current_position: 0, // Will be set after sorting
         user_id: participant.user_id,
-        user: participant.user,
+        user: participant.user && Array.isArray(participant.user) && participant.user.length > 0 ? {
+          id: participant.user[0].id,
+          email: participant.user[0].email
+        } : undefined,
       };
     });
 
@@ -138,6 +147,8 @@ export async function GET(
     leaderboard.forEach((entry, index) => {
       entry.current_position = index + 1;
     });
+
+    console.log('🏌️ Final leaderboard:', leaderboard);
 
     if (view === 'overall') {
       return NextResponse.json({ leaderboard });
@@ -169,7 +180,25 @@ export async function GET(
         }
       });
       if (worstScore.participant) {
-        wallOfShame.worst_score = worstScore;
+        wallOfShame.worst_score = {
+          participant: {
+            id: worstScore.participant.id,
+            tournament_id: tournamentId,
+            user_id: worstScore.participant.user_id,
+            player_name: worstScore.participant.player_name,
+            handicap: 0, // Default handicap
+            fourball_number: worstScore.participant.fourball_number,
+            status: 'active' as const,
+            joined_at: new Date().toISOString(),
+            user: worstScore.participant.user && Array.isArray(worstScore.participant.user) && worstScore.participant.user.length > 0 ? {
+              id: worstScore.participant.user[0].id,
+              email: worstScore.participant.user[0].email,
+              raw_user_meta_data: worstScore.participant.user[0].raw_user_meta_data
+            } : undefined
+          },
+          score: worstScore.score,
+          hole_number: worstScore.hole_number
+        };
       }
 
       // Most penalties overall
@@ -191,7 +220,23 @@ export async function GET(
         if (worstParticipantId) {
           const participant = participants.find(p => p.id === worstParticipantId);
           if (participant) {
-            wallOfShame.most_penalties = { participant, count: maxPenalties };
+            wallOfShame.most_penalties = { 
+              participant: {
+                id: participant.id,
+                tournament_id: tournamentId,
+                user_id: participant.user_id,
+                player_name: participant.player_name,
+                handicap: 0, // Default handicap
+                fourball_number: participant.fourball_number,
+                status: 'active' as const,
+                joined_at: new Date().toISOString(),
+                user: participant.user && Array.isArray(participant.user) && participant.user.length > 0 ? {
+                  id: participant.user[0].id,
+                  email: participant.user[0].email
+                } : undefined
+              }, 
+              count: maxPenalties 
+            };
           }
         }
 
@@ -213,7 +258,23 @@ export async function GET(
         if (waterParticipantId && maxWater > 0) {
           const participant = participants.find(p => p.id === waterParticipantId);
           if (participant) {
-            wallOfShame.most_water = { participant, count: maxWater };
+            wallOfShame.most_water = { 
+              participant: {
+                id: participant.id,
+                tournament_id: tournamentId,
+                user_id: participant.user_id,
+                player_name: participant.player_name,
+                handicap: 0, // Default handicap
+                fourball_number: participant.fourball_number,
+                status: 'active' as const,
+                joined_at: new Date().toISOString(),
+                user: participant.user && Array.isArray(participant.user) && participant.user.length > 0 ? {
+                  id: participant.user[0].id,
+                  email: participant.user[0].email
+                } : undefined
+              }, 
+              count: maxWater 
+            };
           }
         }
 
@@ -235,7 +296,23 @@ export async function GET(
         if (threePuttParticipantId && maxThreePutts > 0) {
           const participant = participants.find(p => p.id === threePuttParticipantId);
           if (participant) {
-            wallOfShame.most_3_putts = { participant, count: maxThreePutts };
+            wallOfShame.most_3_putts = { 
+              participant: {
+                id: participant.id,
+                tournament_id: tournamentId,
+                user_id: participant.user_id,
+                player_name: participant.player_name,
+                handicap: 0, // Default handicap
+                fourball_number: participant.fourball_number,
+                status: 'active' as const,
+                joined_at: new Date().toISOString(),
+                user: participant.user && Array.isArray(participant.user) && participant.user.length > 0 ? {
+                  id: participant.user[0].id,
+                  email: participant.user[0].email
+                } : undefined
+              }, 
+              count: maxThreePutts 
+            };
           }
         }
       }
@@ -248,6 +325,7 @@ export async function GET(
       const heroBoard: GolfHeroBoard = {
         most_birdies: null,
         most_eagles: null,
+        best_hole: null,
         longest_drive_winners: [],
         closest_to_pin_winners: [],
       };
@@ -260,7 +338,24 @@ export async function GET(
       if (birdieLeader && birdieLeader.birdies > 0) {
         const participant = participants.find(p => p.id === birdieLeader.participant_id);
         if (participant) {
-          heroBoard.most_birdies = { participant, count: birdieLeader.birdies };
+          heroBoard.most_birdies = { 
+            participant: {
+              id: participant.id,
+              tournament_id: tournamentId,
+              user_id: participant.user_id,
+              player_name: participant.player_name,
+              handicap: 0, // Default handicap
+              fourball_number: participant.fourball_number,
+              status: 'active' as const,
+              joined_at: new Date().toISOString(),
+              user: participant.user && Array.isArray(participant.user) && participant.user.length > 0 ? {
+                id: participant.user[0].id,
+                email: participant.user[0].email,
+                raw_user_meta_data: participant.user[0].raw_user_meta_data
+              } : undefined
+            }, 
+            count: birdieLeader.birdies 
+          };
         }
       }
 
@@ -272,7 +367,24 @@ export async function GET(
       if (eagleLeader && eagleLeader.eagles > 0) {
         const participant = participants.find(p => p.id === eagleLeader.participant_id);
         if (participant) {
-          heroBoard.most_eagles = { participant, count: eagleLeader.eagles };
+          heroBoard.most_eagles = { 
+            participant: {
+              id: participant.id,
+              tournament_id: tournamentId,
+              user_id: participant.user_id,
+              player_name: participant.player_name,
+              handicap: 0, // Default handicap
+              fourball_number: participant.fourball_number,
+              status: 'active' as const,
+              joined_at: new Date().toISOString(),
+              user: participant.user && Array.isArray(participant.user) && participant.user.length > 0 ? {
+                id: participant.user[0].id,
+                email: participant.user[0].email,
+                raw_user_meta_data: participant.user[0].raw_user_meta_data
+              } : undefined
+            }, 
+            count: eagleLeader.eagles 
+          };
         }
       }
 

@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET(
   request: Request,
-  context: { params: { tournamentId: string } }
+  context: { params: Promise<{ tournamentId: string }> }
 ) {
   try {
     const supabase = await createClient();

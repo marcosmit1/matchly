@@ -65,7 +65,7 @@ export default function FriendsClient({ userId, initialFriends }: { userId: stri
         { event: "*", schema: "public", table: "friends", filter: `friend_id=eq.${userId}` },
         () => fetchFriends()
       )
-      .subscribe((status) => {
+      .subscribe((status: 'SUBSCRIBED' | 'CHANNEL_ERROR' | 'TIMED_OUT' | 'CLOSED') => {
         if (status === "SUBSCRIBED" && pollingRef.current) {
           clearInterval(pollingRef.current);
           pollingRef.current = null;

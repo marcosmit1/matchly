@@ -39,12 +39,12 @@ export default function InvitesClient({ initialInvites }: { initialInvites: Invi
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "invitations" },
-        (payload) => setInvites((prev) => [payload.new as Invite, ...prev])
+        (payload: { new: Invite }) => setInvites((prev) => [payload.new, ...prev])
       )
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "invitations" },
-        (payload) => setInvites((prev) => prev.map((i) => (i.id === (payload.new as any).id ? (payload.new as Invite) : i)))
+        (payload: { new: Invite }) => setInvites((prev) => prev.map((i) => (i.id === payload.new.id ? payload.new : i)))
       )
       .subscribe();
 

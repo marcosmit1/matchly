@@ -32,7 +32,7 @@ function autoAssignFourballs(participantIds: string[]): Array<{ participant_id: 
 // POST /api/golf-tournaments/[tournamentId]/start - Start tournament and assign fourballs
 export async function POST(
   request: Request,
-  { params }: { params: { tournamentId: string } }
+  { params }: { params: Promise<{ tournamentId: string }> }
 ) {
   try {
     const supabase = await createClient();

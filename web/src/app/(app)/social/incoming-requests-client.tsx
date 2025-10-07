@@ -38,7 +38,7 @@ export default function IncomingRequestsClient({ userId, initialRequests }: { us
         .eq("recipient_id", userId)
         .eq("status", "pending")
         .order("created_at", { ascending: false });
-      if (data) setRequests(data as any);
+      if (data) setRequests(data as IncomingRequest[]);
     }
 
     // Realtime subscription (INSERT/UPDATE)
@@ -47,18 +47,18 @@ export default function IncomingRequestsClient({ userId, initialRequests }: { us
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "friend_requests", filter: `recipient_id=eq.${userId}` },
-        async (payload) => {
+        async (payload: { eventType: string; new: { id: string; sender_id: string; created_at: string; status: "pending" | "accepted" | "declined" } }) => {
           const action = (payload.eventType || "").toString();
           if (action === "INSERT") {
             // fetch sender for the new request
             const { data: sender } = await supabase
               .from("users")
               .select("id, username, first_name, last_name, email")
-              .eq("id", (payload.new as any).sender_id)
-              .maybeSingle();
+              .eq("id", payload.new.sender_id)
+              .maybeSingle() as unknown as { data: RequestSender | null };
             if (sender) {
               setRequests((prev) => [
-                { id: (payload.new as any).id, created_at: (payload.new as any).created_at, status: (payload.new as any).status, sender },
+                { id: payload.new.id, created_at: payload.new.created_at, status: payload.new.status, sender },
                 ...prev,
               ]);
             } else {
@@ -66,15 +66,15 @@ export default function IncomingRequestsClient({ userId, initialRequests }: { us
             }
           } else if (action === "UPDATE") {
             // If status changed from pending, remove from list
-            if ((payload.new as any).status !== "pending") {
-              setRequests((prev) => prev.filter((r) => r.id !== (payload.new as any).id));
+            if (payload.new.status !== "pending") {
+              setRequests((prev) => prev.filter((r) => r.id !== payload.new.id));
             }
           } else {
             fetchLatest();
           }
         }
       )
-      .subscribe((status) => {
+      .subscribe((status: 'SUBSCRIBED' | 'CHANNEL_ERROR' | 'TIMED_OUT' | 'CLOSED') => {
         // If RT fails, start fallback polling
         if (status === "SUBSCRIBED") {
           if (pollingRef.current) {

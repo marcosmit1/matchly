@@ -87,11 +87,13 @@ export default async function GolfPlayPage({ params }: GolfPlayPageProps) {
 
   // Fetch holes
   console.log("🎯 Fetching holes for tournament:", tournamentId);
-  let { data: holes, error: holesError } = await supabase
+  const { data: initialHoles, error: holesError } = await supabase
     .from("golf_holes")
     .select("*")
     .eq("tournament_id", tournamentId)
     .order("hole_number", { ascending: true });
+  
+  let holes = initialHoles;
 
   console.log("🏌️ Holes data:", holes);
   console.log("❌ Holes error (if any):", holesError);

@@ -209,12 +209,12 @@ export function USE_REALTIME_GAME(gameid: string, initialgame: GAME): USE_REALTI
           table: "game_events",
           filter: `game_id=eq.${gameid}`,
         },
-        (payload) => {
+        (payload: RealtimePostgresChangesPayload<any>) => {
           console.log("🎯 Raw game event received:", payload);
           HANDLE_GAME_EVENT(payload);
         }
       )
-      .subscribe((status) => {
+      .subscribe((status: 'SUBSCRIBED' | 'CHANNEL_ERROR' | 'TIMED_OUT' | 'CLOSED') => {
         console.log("📡 Realtime subscription status:", status);
 
         if (status === "SUBSCRIBED") {

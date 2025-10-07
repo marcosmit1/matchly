@@ -105,7 +105,7 @@ export function GolfScorecardGrid({
     });
     console.log('📊 Score Map:', scoreMap);
     setScores(scoreMap);
-  }, [existingScores]);
+  }, [existingScores, tournament, participants, holes, currentUserId]);
 
   // Subscribe to real-time score updates
   useEffect(() => {

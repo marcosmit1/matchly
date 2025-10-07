@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 // POST /api/golf-tournaments/[tournamentId]/guest-players - Add guest player
 export async function POST(
   request: Request,
-  { params }: { params: { tournamentId: string } }
+  { params }: { params: Promise<{ tournamentId: string }> }
 ) {
   try {
     const supabase = await createClient();

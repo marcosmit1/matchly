@@ -5,11 +5,11 @@ import type { GolfPenaltyType } from '@/types/golf';
 // POST /api/golf-tournaments/[tournamentId]/penalties - Report a penalty
 export async function POST(
   request: Request,
-  { params }: { params: { tournamentId: string } }
+  { params }: { params: Promise<{ tournamentId: string }> }
 ) {
   try {
     const supabase = await createClient();
-    const tournamentId = params.tournamentId;
+    const { tournamentId } = await params;
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -116,11 +116,11 @@ export async function POST(
 // GET /api/golf-tournaments/[tournamentId]/penalties - Get all penalties
 export async function GET(
   request: Request,
-  { params }: { params: { tournamentId: string } }
+  { params }: { params: Promise<{ tournamentId: string }> }
 ) {
   try {
     const supabase = await createClient();
-    const tournamentId = params.tournamentId;
+    const { tournamentId } = await params;
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();

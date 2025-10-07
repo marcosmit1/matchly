@@ -5,11 +5,11 @@ import type { SendGolfFineRequest } from '@/types/golf';
 // POST /api/golf-tournaments/[tournamentId]/fines - Send a fine to another player
 export async function POST(
   request: Request,
-  { params }: { params: { tournamentId: string } }
+  { params }: { params: Promise<{ tournamentId: string }> }
 ) {
   try {
     const supabase = await createClient();
-    const tournamentId = params.tournamentId;
+    const { tournamentId } = await params;
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -114,11 +114,11 @@ export async function POST(
 // GET /api/golf-tournaments/[tournamentId]/fines - Get all fines
 export async function GET(
   request: Request,
-  { params }: { params: { tournamentId: string } }
+  { params }: { params: Promise<{ tournamentId: string }> }
 ) {
   try {
     const supabase = await createClient();
-    const tournamentId = params.tournamentId;
+    const { tournamentId } = await params;
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();

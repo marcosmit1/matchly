@@ -25,7 +25,7 @@ export function HomeHero({ username }: { username: string }) {
           <div className="truncate text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70">
             {username}
           </div>
-          <div className="mt-1 text-xs text-white/60">Let's compete today 🏆</div>
+          <div className="mt-1 text-xs text-white/60">Let&apos;s compete today 🏆</div>
         </div>
       </div>
     </div>

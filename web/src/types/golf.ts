@@ -213,6 +213,12 @@ export interface GolfHeroBoard {
     participant: GolfParticipantWithUser;
     count: number;
   } | null;
+  best_hole: {
+    participant: GolfParticipantWithUser;
+    hole_number: number;
+    par: number;
+    score: number;
+  } | null;
   longest_drive_winners: GolfHoleChallenge[];
   closest_to_pin_winners: GolfHoleChallenge[];
 }
