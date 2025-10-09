@@ -5,15 +5,19 @@ import { Button } from "@/blocks/button";
 import { Input } from "@/blocks/input";
 import { Play, Clock, CheckCircle, Trophy, Users, Calendar, MapPin, Target } from "lucide-react";
 
-interface Match {
+interface BaseMatch {
   id: string;
+  status: string;
+  match_type: string;
+  scheduled_at: string;
+}
+
+interface LeagueMatch extends BaseMatch {
+  type: 'league';
   league_id: string;
   box_id: string;
   player1_id: string;
   player2_id: string;
-  status: string;
-  match_type: string;
-  scheduled_at: string;
   court_number: number;
   player1_score: number;
   player2_score: number;
@@ -28,11 +32,24 @@ interface Match {
   };
 }
 
+interface GolfMatch extends BaseMatch {
+  type: 'golf';
+  tournament_id: string;
+  tournament_name: string;
+  course_name: string;
+  participant_id: string;
+  fourball_number: number;
+  holes_completed: number;
+  total_holes: number;
+}
+
+type Match = LeagueMatch | GolfMatch;
+
 export function MatchesList() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [selectedMatch, setSelectedMatch] = useState<LeagueMatch | null>(null);
   const [scoreForm, setScoreForm] = useState({
     player1_score: 0 as number | string,
     player2_score: 0 as number | string,
@@ -49,13 +66,48 @@ export function MatchesList() {
       const params = new URLSearchParams();
       if (statusFilter !== "all") params.append("status", statusFilter);
 
-      const response = await fetch(`/api/matches?${params.toString()}`);
-      const data = await response.json();
+      // Fetch both league matches and golf tournaments in parallel
+      const [leagueResponse, golfResponse] = await Promise.all([
+        fetch(`/api/matches?${params.toString()}`),
+        fetch(`/api/golf-tournaments?participant=true`)
+      ]);
 
-      if (response.ok) {
-        setMatches(data.matches || []);
+      const [leagueData, golfData] = await Promise.all([
+        leagueResponse.json(),
+        golfResponse.json()
+      ]);
+
+      if (leagueResponse.ok && golfResponse.ok) {
+        // Transform league matches
+        const leagueMatches = (leagueData.matches || []).map((match: any) => ({
+          ...match,
+          type: 'league' as const
+        }));
+
+        // Transform golf tournaments into matches
+        const golfMatches = (golfData.tournaments || []).map((tournament: any) => ({
+          id: tournament.id,
+          type: 'golf' as const,
+          status: tournament.status,
+          match_type: 'golf_tournament',
+          scheduled_at: tournament.start_date || tournament.created_at,
+          tournament_id: tournament.id,
+          tournament_name: tournament.name,
+          course_name: tournament.course_name,
+          participant_id: tournament.participant_id,
+          fourball_number: tournament.fourball_number || 1,
+          holes_completed: tournament.holes_completed || 0,
+          total_holes: tournament.holes_count || 18
+        }));
+
+        // Combine and sort by date
+        const allMatches = [...leagueMatches, ...golfMatches].sort((a, b) => 
+          new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime()
+        );
+
+        setMatches(allMatches);
       } else {
-        console.error("Error fetching matches:", data.error);
+        console.error("Error fetching matches:", leagueData.error || golfData.error);
       }
     } catch (error) {
       console.error("Error fetching matches:", error);
@@ -94,7 +146,7 @@ export function MatchesList() {
     }
   };
 
-  const openScoreModal = (match: Match) => {
+  const openScoreModal = (match: LeagueMatch) => {
     setSelectedMatch(match);
     setScoreForm({
       player1_score: match.player1_score,
@@ -105,7 +157,7 @@ export function MatchesList() {
   };
 
   const submitScore = async () => {
-    if (!selectedMatch) return;
+    if (!selectedMatch || selectedMatch.type !== 'league') return;
 
     try {
       const response = await fetch(`/api/leagues/${selectedMatch.league_id}/matches/${selectedMatch.id}/score`, {
@@ -186,12 +238,23 @@ export function MatchesList() {
             <div key={match.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <div className="text-2xl">🏸</div>
+                  <div className="text-2xl">{match.type === 'golf' ? '⛳️' : '🏸'}</div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      Player {match.player1_id.slice(0, 8)} vs Player {match.player2_id.slice(0, 8)}
-                    </h3>
-                    <p className="text-sm text-gray-600">Box {match.box.box_number} - {match.box.box_name}</p>
+                    {match.type === 'golf' ? (
+                      <>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {match.tournament_name}
+                        </h3>
+                        <p className="text-sm text-gray-600">{match.course_name}</p>
+                      </>
+                    ) : (
+                      <>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          Player {match.player1_id.slice(0, 8)} vs Player {match.player2_id.slice(0, 8)}
+                        </h3>
+                        <p className="text-sm text-gray-600">Box {match.box.box_number} - {match.box.box_name}</p>
+                      </>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -215,19 +278,34 @@ export function MatchesList() {
                     <span>{formatTime(match.scheduled_at)}</span>
                   </div>
                 )}
-                {match.court_number && (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <MapPin className="w-4 h-4" />
-                    <span>Court {match.court_number}</span>
-                  </div>
+                {match.type === 'golf' ? (
+                  <>
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <Users className="w-4 h-4" />
+                      <span>Fourball {match.fourball_number}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <Target className="w-4 h-4" />
+                      <span>{match.holes_completed} of {match.total_holes} holes</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {match.court_number && (
+                      <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <MapPin className="w-4 h-4" />
+                        <span>Court {match.court_number}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <Target className="w-4 h-4" />
+                      <span>Best of {match.sets_to_win} sets</span>
+                    </div>
+                  </>
                 )}
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <Target className="w-4 h-4" />
-                  <span>Best of {match.sets_to_win} sets</span>
-                </div>
               </div>
 
-              {match.status === "completed" && (
+              {match.type === 'league' && match.status === "completed" && (
                 <div className="bg-gray-50 rounded-lg p-4 mb-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-900">
@@ -240,26 +318,38 @@ export function MatchesList() {
 
               <div className="flex items-center justify-between">
                 <div className="text-xs text-gray-500">
-                  {match.match_type === "round_robin" ? "Round Robin" : "Tournament"}
+                  {match.type === 'golf' ? 'Golf Tournament' : match.match_type === "round_robin" ? "Round Robin" : "Tournament"}
                 </div>
                 <div className="flex space-x-2">
-                  {match.status === "scheduled" && (
+                  {match.type === 'golf' ? (
                     <Button
-                      onClick={() => openScoreModal(match)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 text-sm flex items-center space-x-1"
-                    >
-                      <Play className="w-4 h-4" />
-                      <span>Enter Score</span>
-                    </Button>
-                  )}
-                  {match.status === "in_progress" && (
-                    <Button
-                      onClick={() => openScoreModal(match)}
+                      onClick={() => window.location.href = `/golf/${match.tournament_id}`}
                       className="bg-green-600 hover:bg-green-700 text-white rounded-lg px-4 py-2 text-sm flex items-center space-x-1"
                     >
-                      <CheckCircle className="w-4 h-4" />
-                      <span>Update Score</span>
+                      <Play className="w-4 h-4" />
+                      <span>Go to Tournament</span>
                     </Button>
+                  ) : (
+                    <>
+                      {match.status === "scheduled" && (
+                        <Button
+                          onClick={() => openScoreModal(match)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 text-sm flex items-center space-x-1"
+                        >
+                          <Play className="w-4 h-4" />
+                          <span>Enter Score</span>
+                        </Button>
+                      )}
+                      {match.status === "in_progress" && (
+                        <Button
+                          onClick={() => openScoreModal(match)}
+                          className="bg-green-600 hover:bg-green-700 text-white rounded-lg px-4 py-2 text-sm flex items-center space-x-1"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                          <span>Update Score</span>
+                        </Button>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

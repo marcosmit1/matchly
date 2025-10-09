@@ -21,28 +21,75 @@ export async function GET(request: NextRequest) {
 
     console.log("🔍 Building query...");
     
-    let query = supabase
+    const query = supabase
       .from("golf_tournaments")
       .select(`
         *,
-        golf_tournament_participants (*)
+        golf_tournament_participants (*),
+        golf_scores (
+          hole_number,
+          participant_id
+        )
       `);
 
     // Log the base query
     console.log("📝 Base query built");
 
+    console.log("⏳ Executing queries...");
+    let tournaments: any[] = [];
+    let error;
+
     if (isPublic) {
       // Get all public tournaments (setup or active status)
-      query = query.in("status", ["setup", "active"]);
-      console.log("🎯 Added public filter: showing setup and active tournaments");
+      const { data, error: queryError } = await query
+        .in("status", ["setup", "active"])
+        .order("created_at", { ascending: false });
+      
+      tournaments = data || [];
+      error = queryError;
+      console.log("🎯 Fetched public tournaments");
     } else {
-      // Get tournaments created by user or where user is a participant
-      query = query.or(`created_by.eq.${user.id},id.in.(select tournament_id from golf_tournament_participants where user_id = '${user.id}')`);
-      console.log("🎯 Added user filter for:", user.id);
-    }
+      // Get tournaments created by user
+      const { data: createdTournaments, error: createdError } = await query
+        .eq("created_by", user.id);
 
-    console.log("⏳ Executing query...");
-    const { data: tournaments, error } = await query.order("created_at", { ascending: false });
+      // Get tournaments where user is a participant
+      const { data: participatingTournaments, error: participatingError } = await supabase
+        .from("golf_tournament_participants")
+        .select(`
+          tournament:tournament_id (
+            *,
+            golf_tournament_participants (*),
+            golf_scores (
+              hole_number,
+              participant_id
+            )
+          )
+        `)
+        .eq("user_id", user.id);
+
+      if (createdError || participatingError) {
+        error = createdError || participatingError;
+      } else {
+        // Extract tournaments from participating data and combine with created tournaments
+        const participatingTournamentsData = participatingTournaments
+          ?.map(p => p.tournament)
+          .filter(t => t !== null) || [];
+
+        // Combine and deduplicate tournaments
+        const tournamentMap = new Map();
+        [...(createdTournaments || []), ...participatingTournamentsData].forEach(t => {
+          if (!tournamentMap.has(t.id)) {
+            tournamentMap.set(t.id, t);
+          }
+        });
+        
+        // Sort by created_at after combining
+        tournaments = Array.from(tournamentMap.values())
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      }
+      console.log("🎯 Fetched user's tournaments:", tournaments.length);
+    }
     
     // Log raw response
     console.log("📦 Raw tournaments data:", tournaments);
@@ -62,7 +109,12 @@ export async function GET(request: NextRequest) {
     const transformedTournaments = tournaments?.map(tournament => {
       console.log("🎯 Transforming tournament:", tournament.id, tournament.name);
       
-      return {
+      // Find the current user's participant record
+      const userParticipant = tournament.golf_tournament_participants?.find(
+        (p: any) => p.user_id === user.id
+      );
+      
+      const baseData = {
         id: tournament.id,
         name: tournament.name,
         description: tournament.description,
@@ -78,9 +130,29 @@ export async function GET(request: NextRequest) {
         number_of_courts: tournament.holes_count,
         points_to_win: tournament.course_par,
         users: {
-          username: "Golf Tournament" // We'll need to fetch this separately if needed
+          username: "Golf Tournament"
         }
       };
+
+      // If this is a participant request, add participant info
+      const { searchParams } = new URL(request.url);
+      if (searchParams.get("participant") === "true" && userParticipant) {
+        // Calculate holes completed for this participant
+        const holesCompleted = tournament.golf_scores?.filter(
+          (score: any) => score.participant_id === userParticipant.id
+        ).length || 0;
+
+        return {
+          ...baseData,
+          course_name: tournament.course_name,
+          participant_id: userParticipant.id,
+          fourball_number: userParticipant.fourball_number || 1,
+          holes_completed: holesCompleted,
+          total_holes: tournament.holes_count || 18
+        };
+      }
+
+      return baseData;
     }) || [];
 
     console.log("✅ Transformation complete. Tournament count:", transformedTournaments.length);

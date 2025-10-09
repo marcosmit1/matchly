@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useModal } from "@/contexts/modal-context";
 import { GolfTournamentGuestPlayerManager } from "@/components/golf-tournament-guest-player-manager";
 import { ManualFourballAssignment } from "@/components/golf-manual-fourball-assignment";
@@ -46,46 +46,6 @@ export function GolfTournamentDetails({ tournament, userId }: GolfTournamentDeta
   const [showManualAssignment, setShowManualAssignment] = useState(false);
   const { showConfirm, showSuccess, showError, showModal, hideModal } = useModal();
 
-  useEffect(() => {
-    fetchCurrentUser();
-  }, []);
-
-  useEffect(() => {
-    if (!currentUser) return;
-
-    fetchParticipants();
-    fetchHoles();
-
-    // Subscribe to tournament status changes
-    const supabase = createClient();
-    const subscription = supabase
-      .channel(`tournament-${tournament.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'golf_tournaments',
-          filter: `id=eq.${tournament.id}`
-        },
-        (payload: { new: { status: string } }) => {
-          console.log('🔄 Tournament updated:', payload);
-          // Refresh the page when tournament status changes
-          if (payload.new.status !== tournament.status) {
-            console.log('📢 Tournament status changed, reloading...');
-            if (typeof window !== 'undefined') {
-              window.location.reload();
-            }
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [currentUser, tournament.id, tournament.status]);
-
   const fetchCurrentUser = async () => {
     try {
       const supabase = createClient();
@@ -109,7 +69,7 @@ export function GolfTournamentDetails({ tournament, userId }: GolfTournamentDeta
     }
   };
 
-  const fetchParticipants = async () => {
+  const fetchParticipants = useCallback(async () => {
     try {
       const supabase = createClient();
       const { data: participantsData, error } = await supabase
@@ -133,9 +93,47 @@ export function GolfTournamentDetails({ tournament, userId }: GolfTournamentDeta
     } finally {
       setLoading(false);
     }
+  }, [tournament.id, userId]);
+
+  useEffect(() => {
+    fetchCurrentUser();
+  }, []);
+
+  const [refreshing, setRefreshing] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState(tournament.status);
+
+  const refreshTournament = async () => {
+    setRefreshing(true);
+    try {
+      const supabase = createClient();
+      // Fetch latest tournament status
+      const { data: latestTournament, error } = await supabase
+        .from("golf_tournaments")
+        .select("status")
+        .eq("id", tournament.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching tournament:', error);
+        return;
+      }
+
+      if (latestTournament.status !== currentStatus) {
+        setCurrentStatus(latestTournament.status);
+        // Refetch participants and holes
+        await Promise.all([fetchParticipants(), fetchHoles()]);
+        if (latestTournament.status === 'active') {
+          showSuccess("Tournament has started! You can now record scores.");
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing tournament:', error);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
-  const fetchHoles = async () => {
+  const fetchHoles = useCallback(async () => {
     try {
       const supabase = createClient();
       console.log('🔎 [Lobby] Fetching tournament holes for', tournament.id);
@@ -211,7 +209,13 @@ export function GolfTournamentDetails({ tournament, userId }: GolfTournamentDeta
     } catch (error) {
       console.error('Error fetching holes:', error);
     }
-  };
+  }, [tournament.id, tournament.cached_course_id, tournament.course_name, tournament.name]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    fetchParticipants();
+    fetchHoles();
+  }, [currentUser, fetchParticipants, fetchHoles]);
 
   const handleCopyInviteCode = async () => {
     if (tournament.invite_code) {
@@ -376,12 +380,12 @@ export function GolfTournamentDetails({ tournament, userId }: GolfTournamentDeta
 
           <div className="ml-4">
             <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-              tournament.status === 'setup' ? 'bg-white/20 text-white' :
-              tournament.status === 'active' ? 'bg-white/30 text-white' :
+              currentStatus === 'setup' ? 'bg-white/20 text-white' :
+              currentStatus === 'active' ? 'bg-white/30 text-white' :
               'bg-white/20 text-white'
             }`}>
-              {tournament.status === 'setup' ? '🔧 Setup' :
-               tournament.status === 'active' ? '⛳ Playing' :
+              {currentStatus === 'setup' ? '🔧 Setup' :
+               currentStatus === 'active' ? '⛳ Playing' :
                '✅ Completed'}
             </div>
           </div>
@@ -411,7 +415,7 @@ export function GolfTournamentDetails({ tournament, userId }: GolfTournamentDeta
       </div>
 
       {/* Invite Code Section (only during setup) */}
-      {tournament.status === 'setup' && (
+      {currentStatus === 'setup' && (
         <div className="bg-white border-b border-gray-200 px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
@@ -454,7 +458,7 @@ export function GolfTournamentDetails({ tournament, userId }: GolfTournamentDeta
         {showParticipants && (
           <div className="mt-4">
             {/* Guest Player Manager */}
-            {tournament.status === 'setup' && isCreator && (
+            {currentStatus === 'setup' && isCreator && (
               <div className="mb-4">
                 <GolfTournamentGuestPlayerManager
                   tournamentId={tournament.id}
@@ -502,7 +506,7 @@ export function GolfTournamentDetails({ tournament, userId }: GolfTournamentDeta
 
       {/* Action Buttons */}
       <div className="p-4 space-y-3">
-        {tournament.status === 'setup' && isCreator && (
+        {currentStatus === 'setup' && isCreator && (
           <>
             {canStartTournament ? (
               <div className="space-y-3">
@@ -559,16 +563,46 @@ export function GolfTournamentDetails({ tournament, userId }: GolfTournamentDeta
           </>
         )}
 
-        {tournament.status === 'active' && isParticipant && (
-          <Link href={`/golf/${tournament.id}/play`}>
-            <Button className="w-full bg-green-600 hover:bg-green-700 text-white h-12 rounded-xl font-medium">
-              <Target size={18} className="mr-2" />
-              Record Scores
-            </Button>
-          </Link>
+        {currentStatus === 'setup' && isParticipant && !isCreator && (
+          <Button
+            onClick={refreshTournament}
+            disabled={refreshing}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-xl font-medium"
+          >
+            <div className="flex items-center justify-center">
+              {refreshing ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 4V9H4.58152M19.9381 11C19.446 7.05369 16.0796 4 12 4C8.64262 4 5.76829 6.06817 4.58152 9M4.58152 9H9M20 20V15H19.4185M19.4185 15C18.2317 17.9318 15.3574 20 12 20C7.92038 20 4.55399 16.9463 4.06189 13M19.4185 15H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Check Tournament Status
+                </>
+              )}
+            </div>
+          </Button>
         )}
 
-        {(tournament.status === 'active' || tournament.status === 'completed') && (
+        {currentStatus === 'active' && isParticipant && (
+          <div className="space-y-3">
+            <Link href={`/golf/${tournament.id}/play`}>
+              <Button className="w-full bg-green-600 hover:bg-green-700 text-white h-12 rounded-xl font-medium">
+                <Target size={18} className="mr-2" />
+                Record Scores
+              </Button>
+            </Link>
+
+            <Link href={`/golf/${tournament.id}/leaderboard`}>
+              <Button className="w-full bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 h-12 rounded-xl font-medium">
+                <BarChart3 size={18} className="mr-2" />
+                View Leaderboard
+              </Button>
+            </Link>
+          </div>
+        )}
+
+        {currentStatus === 'completed' && (
           <Link href={`/golf/${tournament.id}/leaderboard`}>
             <Button className="w-full bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 h-12 rounded-xl font-medium">
               <BarChart3 size={18} className="mr-2" />
@@ -578,7 +612,7 @@ export function GolfTournamentDetails({ tournament, userId }: GolfTournamentDeta
         )}
 
         {/* Restart Button - Only show for creator when tournament is active */}
-        {isCreator && tournament.status === 'active' && (
+        {isCreator && currentStatus === 'active' && (
           <Button
             onClick={handleRestartTournament}
             disabled={restarting}
