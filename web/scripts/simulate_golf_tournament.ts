@@ -1,7 +1,7 @@
 import { createBrowserClient } from "@supabase/ssr";
 
-const supabaseUrl = "https://iidpshzslwehjjohdzrw.supabase.co";
-const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpZHBzaHpzbHdlaGpqb2hkenJ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzIzODQ3OCwiZXhwIjoyMDcyODE0NDc4fQ.PhgXb9vrSBouTQDae3xtp6-c__E_9d_OVK3ahvJQ6Ak";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
 
