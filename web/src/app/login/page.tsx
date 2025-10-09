@@ -22,6 +22,7 @@ function LoginForm() {
   const [otp, setotp] = useState("");
   const [isloading, setisloading] = useState(false);
   const [error, seterror] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [authState, setAuthState] = useState<AuthState>('email');
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -56,10 +57,11 @@ function LoginForm() {
     };
   }, [router, returnUrl]);
 
-  // Check for error parameters in URL
+  // Check for error and message parameters in URL
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const errorParam = urlParams.get('error');
+    const messageParam = urlParams.get('message');
     
     if (errorParam) {
       switch (errorParam) {
@@ -83,6 +85,14 @@ function LoginForm() {
       }
       
       // Clear the error from URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (messageParam === 'email_confirmed') {
+      // Email was confirmed successfully, show success message and redirect to email input
+      setAuthState('email');
+      seterror(''); // Clear any existing errors
+      setSuccessMessage('✅ Email confirmed successfully! You can now sign in with your email.');
+      
+      // Clear the message from URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
@@ -382,6 +392,12 @@ function LoginForm() {
         {error && (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-600 text-sm text-center">{error}</p>
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-green-600 text-sm text-center">{successMessage}</p>
           </div>
         )}
 

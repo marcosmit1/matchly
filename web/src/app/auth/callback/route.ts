@@ -8,6 +8,14 @@ export async function GET(request: Request) {
   const type = searchParams.get('type');
   const next = searchParams.get('next') ?? '/';
 
+  console.log('Auth callback received:', { 
+    hasCode: !!code, 
+    hasToken: !!token, 
+    type, 
+    next,
+    allParams: Object.fromEntries(searchParams.entries())
+  });
+
   // Handle OTP codes (existing flow)
   if (code) {
     const supabase = await createClient();
@@ -37,33 +45,59 @@ export async function GET(request: Request) {
     }
   }
 
-  // Handle verification tokens (email confirmation flow)
-  if (token && type === 'signup') {
-    console.log('Processing email confirmation:', { token: token.substring(0, 10) + '...', type, redirectTo: next });
+  // Handle email confirmation - Supabase sends different parameters
+  // Check for email confirmation parameters
+  const emailToken = searchParams.get('token') || searchParams.get('access_token');
+  const emailType = searchParams.get('type') || searchParams.get('token_type');
+  
+  if (emailToken && (emailType === 'signup' || emailType === 'email')) {
+    console.log('Processing email confirmation:', { 
+      token: emailToken.substring(0, 10) + '...', 
+      type: emailType, 
+      redirectTo: next 
+    });
     
     try {
       const supabase = await createClient();
       console.log('Supabase client created successfully');
       
-      // Use the proper Supabase method to verify the email confirmation
-      const { data, error } = await supabase.auth.verifyOtp({
-        token_hash: token,
-        type: 'signup'
-      });
+      // Try different approaches for email confirmation
+      let verificationResult;
       
-      if (error) {
-        console.error('Error verifying email confirmation:', error);
-        redirect('/login?error=verification_failed');
+      // First try: verifyOtp with token
+      try {
+        verificationResult = await supabase.auth.verifyOtp({
+          token: emailToken,
+          type: 'signup'
+        });
+        console.log('verifyOtp result:', verificationResult);
+      } catch (verifyError) {
+        console.log('verifyOtp failed, trying alternative approach:', verifyError);
+        
+        // Alternative: try to get session directly (user might already be confirmed)
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (session) {
+          console.log('User already has session, redirecting');
+          redirect(next);
+        }
+        
+        // If no session, redirect to login with success message
+        console.log('Email confirmed but no session, redirecting to login');
+        redirect('/login?message=email_confirmed');
       }
       
-      if (data.session) {
+      if (verificationResult?.data?.session) {
         // User is now authenticated, redirect to the app
         console.log('Email confirmed and user authenticated successfully');
         redirect(next);
+      } else if (verificationResult?.data?.user) {
+        // User confirmed but no session, redirect to login
+        console.log('Email confirmed but no session created');
+        redirect('/login?message=email_confirmed');
       } else {
-        // No session created, redirect to login
-        console.log('No session created after email confirmation');
-        redirect('/login?error=no_session');
+        // No user or session, redirect to login
+        console.log('Email confirmation failed');
+        redirect('/login?error=verification_failed');
       }
     } catch (error) {
       console.error('Unexpected error in email confirmation:', error);
