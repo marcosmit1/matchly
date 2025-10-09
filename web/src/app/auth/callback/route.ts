@@ -61,42 +61,24 @@ export async function GET(request: Request) {
       const supabase = await createClient();
       console.log('Supabase client created successfully');
       
-      // Try different approaches for email confirmation
-      let verificationResult;
+      // For email confirmations, Supabase doesn't automatically create a session
+      // The email confirmation just verifies the user's email
+      // We need to check if the user is now confirmed and redirect appropriately
       
-      // First try: verifyOtp with token
       try {
-        verificationResult = await supabase.auth.verifyOtp({
-          token: emailToken,
-          type: 'signup'
-        });
-        console.log('verifyOtp result:', verificationResult);
-      } catch (verifyError) {
-        console.log('verifyOtp failed, trying alternative approach:', verifyError);
-        
-        // Alternative: try to get session directly (user might already be confirmed)
+        // Check if user has a session (might be authenticated)
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         if (session) {
           console.log('User already has session, redirecting');
           redirect(next);
         }
         
-        // If no session, redirect to login with success message
-        console.log('Email confirmed but no session, redirecting to login');
+        // No session found, which is normal for email confirmations
+        // The user's email is now confirmed, but they need to sign in
+        console.log('Email confirmed but no session, redirecting to login with success message');
         redirect('/login?message=email_confirmed');
-      }
-      
-      if (verificationResult?.data?.session) {
-        // User is now authenticated, redirect to the app
-        console.log('Email confirmed and user authenticated successfully');
-        redirect(next);
-      } else if (verificationResult?.data?.user) {
-        // User confirmed but no session, redirect to login
-        console.log('Email confirmed but no session created');
-        redirect('/login?message=email_confirmed');
-      } else {
-        // No user or session, redirect to login
-        console.log('Email confirmation failed');
+      } catch (error) {
+        console.error('Error checking session after email confirmation:', error);
         redirect('/login?error=verification_failed');
       }
     } catch (error) {

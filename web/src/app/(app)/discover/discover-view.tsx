@@ -395,22 +395,20 @@ export function DiscoverView() {
       <div className="grid grid-cols-3 gap-3">
         <Link href="/create-league">
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl p-4 flex items-center justify-center space-x-2 hover:shadow-md transition-all">
-            <Trophy className="w-5 h-5" />
             <span className="font-medium">Create League</span>
           </div>
         </Link>
         <Link href="/create-tournament">
           <div className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl p-4 flex items-center justify-center space-x-2 hover:shadow-md transition-all">
             <Target className="w-5 h-5" />
-            <span className="font-medium">Create Tournament</span>
+            <span className="font-medium">Create a Tournament</span>
           </div>
         </Link>
         <button
           onClick={() => showJoinCodeModal()}
           className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white rounded-xl p-4 flex items-center justify-center space-x-2 hover:shadow-md transition-all"
         >
-          <Hash className="w-5 h-5" />
-          <span className="font-medium">Join with Code</span>
+          <span className="font-medium">Join with a Code</span>
         </button>
       </div>
 
