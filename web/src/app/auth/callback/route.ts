@@ -37,59 +37,36 @@ export async function GET(request: Request) {
     }
   }
 
-  // Handle verification tokens (new flow)
+  // Handle verification tokens (email confirmation flow)
   if (token && type === 'signup') {
-    console.log('Processing verification token:', { token: token.substring(0, 10) + '...', type, redirectTo: next });
+    console.log('Processing email confirmation:', { token: token.substring(0, 10) + '...', type, redirectTo: next });
     
     try {
       const supabase = await createClient();
       console.log('Supabase client created successfully');
       
-      // For verification tokens from email confirmation, we need to use a different approach
-      // Let's try to get the user session directly since the token should have verified the user
-      console.log('Attempting to get user session after verification...');
+      // Use the proper Supabase method to verify the email confirmation
+      const { data, error } = await supabase.auth.verifyOtp({
+        token_hash: token,
+        type: 'signup'
+      });
       
-      // First, let's check if we can get the current session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        console.error('Error getting session after verification:', sessionError);
+      if (error) {
+        console.error('Error verifying email confirmation:', error);
         redirect('/login?error=verification_failed');
       }
       
-      if (session) {
-        // User is already authenticated, redirect to the app
-        console.log('User verified and authenticated successfully');
+      if (data.session) {
+        // User is now authenticated, redirect to the app
+        console.log('Email confirmed and user authenticated successfully');
         redirect(next);
       } else {
-        // No session found immediately, let's wait a bit and try again
-        // Supabase might need a moment to process the verification
-        console.log('No session found immediately, waiting and retrying...');
-        
-        // Wait 1 second for Supabase to process
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Try again
-        const { data: { session: retrySession }, error: retryError } = await supabase.auth.getSession();
-        
-        if (retryError) {
-          console.error('Error getting session on retry:', retryError);
-          redirect('/login?error=verification_failed');
-        }
-        
-        if (retrySession) {
-          console.log('User verified and authenticated successfully on retry');
-          redirect(next);
-        } else {
-          // Still no session, the verification might not have completed properly
-          console.log('No session found after retry, redirecting to login');
-          redirect('/login?error=verification_incomplete');
-        }
+        // No session created, redirect to login
+        console.log('No session created after email confirmation');
+        redirect('/login?error=no_session');
       }
     } catch (error) {
-      console.error('Unexpected error in verification:', error);
-      console.error('Error type:', typeof error);
-      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      console.error('Unexpected error in email confirmation:', error);
       redirect('/login?error=unexpected_error');
     }
   }

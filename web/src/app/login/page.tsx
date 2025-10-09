@@ -191,25 +191,25 @@ function LoginForm() {
     seterror("");
 
     try {
-      // Check if user exists and is verified
+      // Check if user is now authenticated after clicking email confirmation
       const supabase = createClient();
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       
-      if (user) {
-        // User exists and is verified, move to OTP
-        setAuthState('otp');
-        const result = await SEND_OTP_CODE(email);
-        if (result?.error) {
-          seterror(result.error);
-          setAuthState('verification');
-        }
+      if (user && user.email_confirmed_at) {
+        // User is verified and confirmed, redirect to app
+        console.log('User verified and confirmed, redirecting to app');
+        router.push(returnUrl);
+        return;
+      } else if (user && !user.email_confirmed_at) {
+        // User exists but email not confirmed yet
+        seterror("Please click the confirmation button in your email to complete verification.");
       } else {
         // User doesn't exist or isn't verified, send verification again
         const verifyResult = await SEND_VERIFICATION_EMAIL(email);
         if (verifyResult?.error) {
           seterror(verifyResult.error);
         } else {
-          seterror("Please check your email and verify before continuing.");
+          seterror("Please check your email and click the confirmation button to complete verification.");
         }
       }
     } catch (error: unknown) {
@@ -292,16 +292,16 @@ function LoginForm() {
                 <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">Check Your Email</h2>
                 <p className="text-gray-600 text-sm mb-4">
-                  We&apos;ve sent a verification code to <span className="text-blue-600 font-medium">{email}</span>
+                  We&apos;ve sent a confirmation email to <span className="text-blue-600 font-medium">{email}</span>
                 </p>
                 <p className="text-gray-500 text-xs mb-4">
-                  Please check your inbox for the 6-digit verification code
+                  Please check your inbox and click the confirmation button
                 </p>
                 <div className="bg-blue-50 rounded-lg p-4 text-sm text-gray-700">
-                  <p><strong>New users:</strong> We do not have an account for you on records. </p>
-                  <p>Enter the verification code to create your account</p>
-                  <p className="mt-2 text-blue-600">✨ <strong>Tip:</strong> The code will be in your email inbox!</p>
-                  <p className="mt-2 text-gray-500">After entering the code, you&apos;ll be automatically signed in.</p>
+                  <p><strong>New users:</strong> We do not have an account for you on records.</p>
+                  <p className="mt-2">📧 <strong>Click the &quot;Confirm My Account&quot; button in your email</strong></p>
+                  <p className="mt-2 text-blue-600">✨ <strong>Tip:</strong> Look for the purple button in your email!</p>
+                  <p className="mt-2 text-gray-500">After clicking the button, you&apos;ll be automatically signed in.</p>
                 </div>
               </div>
               
@@ -313,7 +313,7 @@ function LoginForm() {
                 {isloading ? (
                   <LoadingSpinner size="sm" color="white" />
                 ) : (
-                  "I've Received the Code"
+                  "I've Clicked the Button"
                 )}
               </Button>
               
