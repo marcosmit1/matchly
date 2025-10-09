@@ -145,6 +145,50 @@ export default async function GolfPlayPage({ params }: GolfPlayPageProps) {
     holes = newHoles;
   }
 
+  // Enrich holes with cached course par/handicap if needed
+  if (!holes || holes.length === 0 || holes.some(h => !h.handicap || !h.par)) {
+    try {
+      console.log('🔎 [Play] Enrichment needed. Looking up cached course for', tournament.course_name, 'or', tournament.name);
+      let course: { id: string } | null = null;
+      if (tournament.cached_course_id) {
+        course = { id: tournament.cached_course_id };
+      }
+      if (!course) {
+        const res2 = await supabase
+          .from('golf_courses')
+          .select('id')
+          .ilike('name', tournament.name)
+          .maybeSingle();
+        course = res2.data as typeof course;
+      }
+      console.log('🧭 [Play] Cached course:', course);
+      if (course?.id) {
+        const { data: courseHoles } = await supabase
+          .from('golf_course_holes')
+          .select('hole_number, par, handicap')
+          .eq('course_id', course.id);
+        console.log('🗂️ [Play] Cached course holes:', courseHoles);
+        if (courseHoles && courseHoles.length > 0) {
+          const bestByHole = new Map<number, { par: number | null; handicap: number | null }>();
+          for (const ch of courseHoles) {
+            const existing = bestByHole.get(ch.hole_number);
+            const take = !existing || existing.handicap == null || existing.par == null;
+            if (take) bestByHole.set(ch.hole_number, { par: ch.par ?? null, handicap: ch.handicap ?? null });
+          }
+          // Overlay authoritative par/handicap from course cache
+          holes = (holes || []).map(h => {
+            const best = bestByHole.get(h.hole_number);
+            if (!best) return h;
+            return { ...h, par: best.par ?? h.par, handicap: best.handicap ?? h.handicap };
+          });
+          console.log('✅ [Play] Enriched holes:', holes);
+        }
+      }
+    } catch (e) {
+      console.warn('Hole enrichment skipped:', e);
+    }
+  }
+
   // Fetch existing scores for all participants in the fourball
   const participantIds = participants.map(p => p.id);
   const { data: existingScores, error: scoresError } = await supabase

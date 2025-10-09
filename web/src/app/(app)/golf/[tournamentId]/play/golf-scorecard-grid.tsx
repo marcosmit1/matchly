@@ -315,9 +315,18 @@ export function GolfScorecardGrid({
           fairway_hit: editingScore.fairwayHit,
           green_in_regulation: editingScore.greenInRegulation,
           bunker: editingScore.bunker,
+          water_hazard: editingScore.waterHazard,
           penalties: editingScore.penalties,
           ...scoreTypes,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          // Add fun stats for activity feed
+          stats: {
+            fairway_hit: editingScore.fairwayHit,
+            bunker: editingScore.bunker,
+            water_hazard: editingScore.waterHazard,
+            green_in_regulation: editingScore.greenInRegulation,
+            putts: editingScore.putts
+          }
         })
       });
 
@@ -448,6 +457,9 @@ export function GolfScorecardGrid({
                   <div className="w-14 flex-shrink-0 text-center">
                     <div className="text-xl font-bold bg-gradient-to-br from-green-400 to-green-500 bg-clip-text text-transparent">{hole.hole_number}</div>
                     <div className="text-[10px] text-gray-400 font-medium">PAR {hole.par}</div>
+                    {hole.handicap ? (
+                      <div className="text-[9px] text-gray-500">HCP {hole.handicap}</div>
+                    ) : null}
                   </div>
 
                   {/* Player Scores */}

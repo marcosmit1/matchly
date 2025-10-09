@@ -6,6 +6,8 @@ import { Input } from "@/blocks/input";
 import { Trophy, Users, Calendar, MapPin, Target, Plus, Trash2 } from "lucide-react";
 import { showToast } from "@/components/toast";
 import { BetterDatePicker } from "@/components/better-date-picker";
+import { GolfCourseSearchInput } from "@/components/golf/golf-course-search-input";
+import type { SelectedGolfCourse, TeeBoxOption, GolfHoleFormData } from "@/types/golf-course-api";
 
 interface TournamentPlayer {
   id: string;
@@ -20,6 +22,8 @@ interface CreateTournamentFormProps {
 
 export function CreateTournamentForm({ sport }: CreateTournamentFormProps) {
   const [loading, setLoading] = useState(false);
+  const [selectedGolfCourse, setSelectedGolfCourse] = useState<SelectedGolfCourse | null>(null);
+  const [selectedTeeBox, setSelectedTeeBox] = useState<TeeBoxOption | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -32,8 +36,9 @@ export function CreateTournamentForm({ sport }: CreateTournamentFormProps) {
     pointsToWin: 21 as number | string,
     holes: Array(18).fill(null).map((_, i) => ({
       hole_number: i + 1,
-      par: 4,
-      handicap: i + 1
+      par: 4 as 3 | 4 | 5,
+      handicap: i + 1,
+      yardage: 0
     }))
   });
 
@@ -76,6 +81,49 @@ export function CreateTournamentForm({ sport }: CreateTournamentFormProps) {
     setPlayers(prev => prev.filter(p => p.id !== playerId));
   };
 
+  // Handle golf course selection
+  const handleGolfCourseSelect = (course: SelectedGolfCourse) => {
+    setSelectedGolfCourse(course);
+    setSelectedTeeBox(null); // Reset tee box when course changes
+
+    // Auto-fill tournament name and location if empty
+    if (!formData.name) {
+      handleInputChange("name", course.course_name);
+    }
+    if (!formData.location) {
+      handleInputChange("location", course.location); // Use the formatted location (City, State, Country)
+    }
+  };
+
+  // Handle tee box selection
+  const handleTeeBoxSelect = (teeBoxName: string) => {
+    const teeBox = selectedGolfCourse?.tee_boxes.find(tb => tb.name === teeBoxName);
+    if (!teeBox) return;
+
+    setSelectedTeeBox(teeBox);
+
+    // Auto-populate holes from selected tee box
+    const newHoles = teeBox.holes.map((hole, index) => ({
+      hole_number: index + 1,
+      par: hole.par,
+      handicap: hole.handicap ?? (index + 1), // Use API handicap or default to sequential
+      yardage: hole.yardage
+    }));
+
+    console.log("🏌️ Auto-populating holes:", newHoles);
+    handleInputChange("holes", newHoles);
+  };
+
+  // Handle individual hole handicap change (for easy editing)
+  const handleHoleHandicapChange = (holeIndex: number, newHandicap: number) => {
+    const newHoles = [...formData.holes];
+    newHoles[holeIndex] = {
+      ...newHoles[holeIndex],
+      handicap: newHandicap
+    };
+    handleInputChange("holes", newHoles);
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,6 +136,27 @@ export function CreateTournamentForm({ sport }: CreateTournamentFormProps) {
       return;
     }
 
+    // Golf-specific validation
+    if (sport === 'golf') {
+      if (!selectedGolfCourse) {
+        showToast({ type: "error", title: "Please search and select a golf course" });
+        return;
+      }
+      if (!selectedTeeBox) {
+        showToast({ type: "error", title: "Please select a tee box" });
+        return;
+      }
+      // Check if any handicaps are missing
+      const missingHandicaps = formData.holes.filter(h => !h.handicap);
+      if (missingHandicaps.length > 0) {
+        showToast({
+          type: "error",
+          title: `Please fill in handicaps for ${missingHandicaps.length} hole(s) (highlighted in orange)`
+        });
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       // Use different API endpoint for golf tournaments
@@ -98,11 +167,15 @@ export function CreateTournamentForm({ sport }: CreateTournamentFormProps) {
             // Golf tournament format
             name: formData.name,
             description: formData.description,
-            course_name: formData.location || 'Golf Course',
+            // Use the actual course name selected (critical for downstream lookups)
+            course_name: selectedGolfCourse?.course_name || formData.name || 'Golf Course',
             start_date: formData.startDate ? formData.startDate.toISOString().split('T')[0] : null,
             location: formData.location,
             max_players: typeof formData.maxPlayers === 'string' && formData.maxPlayers === '' ? 100 : formData.maxPlayers,
             holes: formData.holes,
+            // Include course cache info for updating missing handicaps
+            course_id: selectedGolfCourse?.api_course_id,
+            tee_box_name: selectedTeeBox?.name,
           }
         : {
             // Regular tournament format (padel, squash, etc.)
@@ -164,7 +237,7 @@ export function CreateTournamentForm({ sport }: CreateTournamentFormProps) {
                 <input
                   type="text"
                   placeholder="Enter tournament name"
-                  value={formData.name}
+                  value={formData.name || ""}
                   onChange={(e) => handleInputChange("name", e.target.value)}
                   className="pl-10 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
                   required
@@ -181,7 +254,7 @@ export function CreateTournamentForm({ sport }: CreateTournamentFormProps) {
                 <span className="absolute left-3 top-3 w-4 h-4 text-gray-400">📝</span>
                 <textarea
                   placeholder="Enter tournament description"
-                  value={formData.description}
+                  value={formData.description || ""}
                   onChange={(e) => handleInputChange("description", e.target.value)}
                   className="pl-10 w-full h-24 pt-3 pr-3 pb-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white text-gray-900 placeholder:text-gray-400"
                 />
@@ -247,22 +320,24 @@ export function CreateTournamentForm({ sport }: CreateTournamentFormProps) {
               />
             </div>
 
-            {/* Location */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Location
-              </label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Enter location"
-                  value={formData.location}
-                  onChange={(e) => handleInputChange("location", e.target.value)}
-                  className="pl-10 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
-                />
+            {/* Location - Only show for non-golf sports */}
+            {sport !== 'golf' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Location
+                </label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Enter location"
+                    value={formData.location || ""}
+                    onChange={(e) => handleInputChange("location", e.target.value)}
+                    className="pl-10 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -377,26 +452,61 @@ export function CreateTournamentForm({ sport }: CreateTournamentFormProps) {
             </h2>
 
             <div className="space-y-4">
-              {/* Course Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Course Name *
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-lg">🏌️</span>
-                  <input
-                    type="text"
-                    placeholder="e.g., Pebble Beach Golf Links"
-                    value={formData.location}
-                    onChange={(e) => handleInputChange("location", e.target.value)}
-                    className="pl-10 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
-                    required
-                  />
+              {/* Golf Course Search */}
+              <GolfCourseSearchInput
+                onCourseSelect={handleGolfCourseSelect}
+                selectedCourse={selectedGolfCourse}
+              />
+
+              {/* Tee Box Selection */}
+              {selectedGolfCourse && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Select Tee Box *
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-lg">⛳</span>
+                    <select
+                      value={selectedTeeBox?.name || ""}
+                      onChange={(e) => handleTeeBoxSelect(e.target.value)}
+                      className="pl-10 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-900"
+                      required
+                    >
+                      <option value="">Choose a tee box...</option>
+                      {selectedGolfCourse.tee_boxes.map((teeBox) => (
+                        <option key={teeBox.name} value={teeBox.name}>
+                          {teeBox.display}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Selecting a tee box will auto-populate all hole information
+                  </p>
                 </div>
-                <p className="mt-1 text-xs text-gray-500">
-                  This will be used as the course name in your golf tournament
-                </p>
-              </div>
+              )}
+
+              {/* Location - Show after course selection, allow editing if needed */}
+              {selectedGolfCourse && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Location
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Enter location"
+                      value={formData.location || ""}
+                      onChange={(e) => handleInputChange("location", e.target.value)}
+                      className="pl-10 w-full h-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
+                    />
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Auto-filled from course data, edit if needed
+                  </p>
+                </div>
+              )}
 
               {/* Hole Configuration */}
               <div className="mt-4">
@@ -411,12 +521,12 @@ export function CreateTournamentForm({ sport }: CreateTournamentFormProps) {
                         <div>
                           <label className="block text-xs text-gray-500 mb-1">Par</label>
                           <select
-                            value={hole.par}
+                            value={hole.par ?? 4}
                             onChange={(e) => {
                               const newHoles = [...formData.holes];
                               newHoles[index] = {
                                 ...hole,
-                                par: parseInt(e.target.value)
+                                par: parseInt(e.target.value) as 3 | 4 | 5
                               };
                               handleInputChange("holes", newHoles);
                             }}
@@ -428,23 +538,34 @@ export function CreateTournamentForm({ sport }: CreateTournamentFormProps) {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-xs text-gray-500 mb-1">Handicap</label>
-                          <select
-                            value={hole.handicap}
+                          <label className="block text-xs text-gray-500 mb-1">
+                            Handicap {!hole.handicap && <span className="text-orange-600">⚠️</span>}
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="18"
+                            value={hole.handicap ?? ""}
                             onChange={(e) => {
-                              const newHoles = [...formData.holes];
-                              newHoles[index] = {
-                                ...hole,
-                                handicap: parseInt(e.target.value)
-                              };
-                              handleInputChange("holes", newHoles);
+                              const value = e.target.value;
+                              if (value === "") {
+                                // Allow clearing the field temporarily
+                                const newHoles = [...formData.holes];
+                                newHoles[index] = { ...newHoles[index], handicap: undefined as any };
+                                handleInputChange("holes", newHoles);
+                              } else {
+                                const numValue = parseInt(value);
+                                if (!isNaN(numValue) && numValue >= 1 && numValue <= 18) {
+                                  handleHoleHandicapChange(index, numValue);
+                                }
+                              }
                             }}
-                            className="w-full h-8 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                          >
-                            {Array.from({length: 18}, (_, i) => i + 1).map(handicap => (
-                              <option key={handicap} value={handicap}>{handicap}</option>
-                            ))}
-                          </select>
+                            placeholder="?"
+                            className={`w-full h-8 text-sm border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-center ${
+                              !hole.handicap ? 'border-orange-400 bg-orange-50' : 'border-gray-200'
+                            }`}
+                            title={!hole.handicap ? "Handicap missing from API - please enter" : "Click to edit"}
+                          />
                         </div>
                       </div>
                     </div>
@@ -458,7 +579,9 @@ export function CreateTournamentForm({ sport }: CreateTournamentFormProps) {
                   ⛳ Golf Tournament Format
                 </h4>
                 <ul className="text-sm text-green-800 space-y-1">
-                  <li>• Configure each hole&apos;s par and handicap</li>
+                  <li>• Search from thousands of golf courses worldwide 🌍</li>
+                  <li>• Course data auto-fills (par, yardage, handicap)</li>
+                  <li>• Missing handicaps? Just click and edit - super easy! ✏️</li>
                   <li>• Players grouped into fourballs (4-person groups)</li>
                   <li>• Stroke play with real-time leaderboards</li>
                   <li>• Track penalties, birdies, eagles, and more</li>

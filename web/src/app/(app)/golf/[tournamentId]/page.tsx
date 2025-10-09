@@ -1,6 +1,6 @@
 import { createClient } from "@/supabase/server";
 import { notFound, redirect } from "next/navigation";
-import { GolfTournamentDetails } from "./golf-tournament-details";
+import { ClientWrapper } from "./client-wrapper";
 
 interface GolfTournamentPageProps {
   params: Promise<{
@@ -33,5 +33,5 @@ export default async function GolfTournamentPage({ params }: GolfTournamentPageP
     notFound();
   }
 
-  return <GolfTournamentDetails tournament={tournament} userId={user.id} />;
+  return <ClientWrapper tournament={tournament} userId={user.id} />;
 }

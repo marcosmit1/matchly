@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/blocks/button";
 import { useModal } from "@/contexts/modal-context";
-import { Plus, X, Trash2 } from "lucide-react";
+import { Plus, X, Trash2, Users } from "lucide-react";
 
 interface GolfTournamentGuestPlayerManagerProps {
   tournamentId: string;
@@ -64,15 +64,15 @@ export function GolfTournamentGuestPlayerManager({
 
   return (
     <div className="space-y-3">
-      {!showAddForm ? (
-        <button
-          onClick={() => setShowAddForm(true)}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-medium transition-colors border border-blue-200"
-        >
-          <Plus size={18} />
-          Add Guest Player
-        </button>
-      ) : (
+      <button
+        onClick={() => setShowAddForm(true)}
+        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-medium transition-colors border border-blue-200"
+      >
+        <Plus size={18} />
+        Add Guest Player
+      </button>
+
+      {showAddForm && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="font-medium text-blue-900 text-sm">Add Guest Player</div>

@@ -116,6 +116,9 @@ export async function POST(
       putts: body.putts,
       fairway_hit: body.fairway_hit,
       green_in_regulation: body.green_in_regulation,
+      bunker: body.bunker || false,
+      water_hazard: body.water_hazard || false,
+      penalties: body.penalties?.length || 0,
       ...scoreType,
     };
 

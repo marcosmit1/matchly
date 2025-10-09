@@ -25,6 +25,8 @@ export interface GolfTournament {
   invite_code: string;
   handicap_enabled: boolean;
   side_bets_enabled: boolean;
+  cached_course_id?: string;
+  selected_tee_box?: string;
   created_at: string;
   updated_at: string;
 }
@@ -298,6 +300,7 @@ export interface SubmitGolfScoreRequest {
   fairway_hit?: boolean;
   green_in_regulation?: boolean;
   bunker?: boolean;
+  water_hazard?: boolean;
   penalties?: Array<{
     penalty_type: GolfPenaltyType;
     note?: string;

@@ -163,6 +163,8 @@ export async function POST(request: NextRequest) {
         handicap_enabled: false,
         side_bets_enabled: true,
         invite_code: inviteCode,
+        // Store course and tee box selection directly
+        selected_tee_box: body.tee_box_name || null,
       })
       .select()
       .single();
@@ -190,26 +192,109 @@ export async function POST(request: NextRequest) {
       handicap: i + 1
     }));
 
-    const { error: holesError } = await supabase
+    // Check if holes already exist (in case of retry/duplicate request)
+    const { data: existingHoles } = await supabase
       .from("golf_holes")
-      .insert(
-        holes.map((hole: HoleData) => ({
-          tournament_id: tournament.id,
-          hole_number: hole.hole_number,
-          par: hole.par,
-          handicap: hole.handicap
-        }))
-      );
+      .select("hole_number")
+      .eq("tournament_id", tournament.id)
+      .limit(1);
 
-    if (holesError) {
-      console.error("Error creating holes:", holesError);
-      return NextResponse.json(
-        { error: "Failed to create holes" },
-        { status: 500 }
-      );
+    if (!existingHoles || existingHoles.length === 0) {
+      // Only insert if holes don't exist yet
+      const { error: holesError } = await supabase
+        .from("golf_holes")
+        .insert(
+          holes.map((hole: HoleData) => ({
+            tournament_id: tournament.id,
+            hole_number: hole.hole_number,
+            par: hole.par,
+            handicap: hole.handicap
+          }))
+        );
+
+      if (holesError) {
+        console.error("Error creating holes:", holesError);
+        return NextResponse.json(
+          { error: "Failed to create holes" },
+          { status: 500 }
+        );
+      }
+      console.log("✅ Holes created");
+    } else {
+      console.log("⚠️ Holes already exist for this tournament, skipping insertion");
     }
 
     console.log("✅ Holes created");
+
+    // Update cached course holes if any handicaps were filled in by the user
+    if (body.course_id && body.tee_box_name) {
+      try {
+        // First, find the cached course by api_course_id
+        const { data: cachedCourse } = await supabase
+          .from("golf_courses")
+          .select("id")
+          .eq("api_course_id", body.course_id)
+          .single();
+
+        if (cachedCourse) {
+          // Update tournament with cached_course_id
+          await supabase
+            .from("golf_tournaments")
+            .update({ cached_course_id: cachedCourse.id })
+            .eq("id", tournament.id);
+          // Check if we have handicaps that should be updated in the cache
+          const holesToUpdate = holes.filter((hole: HoleData) => hole.handicap);
+
+          if (holesToUpdate.length > 0) {
+            console.log(`💾 Updating ${holesToUpdate.length} hole handicaps in course cache...`);
+
+            for (const hole of holesToUpdate) {
+              // Update or insert handicap in cached course holes
+              const { error: updateError } = await supabase
+                .from("golf_course_holes")
+                .upsert({
+                  course_id: cachedCourse.id,
+                  tee_box_name: body.tee_box_name,
+                  hole_number: hole.hole_number,
+                  par: hole.par,
+                  handicap: hole.handicap,
+                  yardage: null, // We don't have yardage from tournament form
+                  meters: null,
+                }, {
+                  onConflict: 'course_id,tee_box_name,hole_number',
+                  ignoreDuplicates: false
+                });
+
+              if (updateError) {
+                console.error(`Error updating hole ${hole.hole_number} cache:`, updateError);
+              }
+            }
+
+            console.log("✅ Course cache updated with user-provided handicaps");
+          }
+        }
+      } catch (error) {
+        console.error("Error updating course cache:", error);
+        // Don't fail tournament creation if cache update fails
+      }
+    }
+
+    // Persist a reference to cached course for downstream lookups (best-effort)
+    if (body.course_id) {
+      try {
+        const { data: cached } = await supabase
+          .from('golf_courses')
+          .select('id')
+          .eq('api_course_id', body.course_id)
+          .maybeSingle();
+        if (cached?.id) {
+          await supabase
+            .from('golf_tournaments')
+            .update({ cached_course_id: cached.id })
+            .eq('id', tournament.id);
+        }
+      } catch {}
+    }
 
     // Add creator as first participant
     const { error: participantError } = await supabase

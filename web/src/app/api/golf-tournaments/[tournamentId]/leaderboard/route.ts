@@ -400,6 +400,64 @@ export async function GET(
       return NextResponse.json({ hero_board: heroBoard });
     }
 
+    // FINES View
+    if (view === 'fines') {
+      // Get all fines for this tournament
+      const { data: fines, error: finesError } = await supabase
+        .from('golf_fines')
+        .select(`
+          *,
+          participant:golf_tournament_participants!participant_id(
+            id,
+            player_name
+          )
+        `)
+        .eq('tournament_id', tournamentId)
+        .order('created_at', { ascending: true });
+
+      if (finesError) {
+        console.error('Error fetching fines:', finesError);
+        return NextResponse.json(
+          { error: 'Failed to fetch fines' },
+          { status: 500 }
+        );
+      }
+
+      // Group fines by participant
+      const finesByParticipant = fines?.reduce((acc, fine) => {
+        const participantId = fine.participant_id;
+        if (!acc[participantId]) {
+          acc[participantId] = {
+            participant_id: participantId,
+            player_name: fine.participant?.player_name || 'Unknown',
+            total_fines: 0,
+            fines: []
+          };
+        }
+        
+        // Count fines (tournament_winner is a reward, so subtract 1)
+        if (fine.fine_type === 'tournament_winner') {
+          acc[participantId].total_fines -= 1;
+        } else {
+          acc[participantId].total_fines += 1;
+        }
+        
+        acc[participantId].fines.push({
+          fine_type: fine.fine_type,
+          title: fine.title,
+          reason: fine.reason,
+          stat_value: fine.stat_value,
+          paid: fine.paid
+        });
+        
+        return acc;
+      }, {} as Record<string, any>) || {};
+
+      const finesArray = Object.values(finesByParticipant).sort((a: any, b: any) => b.total_fines - a.total_fines);
+
+      return NextResponse.json({ fines: finesArray, all_fines: fines || [] });
+    }
+
     // Default: return overall leaderboard
     return NextResponse.json({ leaderboard });
 

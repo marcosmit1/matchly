@@ -20,13 +20,35 @@ interface GolfLeaderboardProps {
   userId: string;
 }
 
-type LeaderboardView = 'overall' | 'shame' | 'hero';
+type LeaderboardView = 'overall' | 'shame' | 'hero' | 'fines';
 
 export function GolfLeaderboard({ tournament, userId }: GolfLeaderboardProps) {
   const [view, setView] = useState<LeaderboardView>('overall');
   const [leaderboard, setLeaderboard] = useState<GolfLeaderboardEntry[]>([]);
   const [wallOfShame, setWallOfShame] = useState<GolfWallOfShame | null>(null);
   const [heroBoard, setHeroBoard] = useState<GolfHeroBoard | null>(null);
+  const [fines, setFines] = useState<Array<{
+    participant_id: string;
+    player_name: string;
+    total_fines: number;
+    fines: Array<{
+      fine_type: string;
+      title: string;
+      reason: string;
+      stat_value: string;
+      paid: boolean;
+    }>;
+  }>>([]);
+  const [allFines, setAllFines] = useState<Array<{
+    id: string;
+    fine_type: string;
+    title: string;
+    reason: string;
+    stat_value: string;
+    participant: {
+      player_name: string;
+    };
+  }>>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -56,6 +78,9 @@ export function GolfLeaderboard({ tournament, userId }: GolfLeaderboardProps) {
         setWallOfShame(data.wall_of_shame || null);
       } else if (view === 'hero') {
         setHeroBoard(data.hero_board || null);
+      } else if (view === 'fines') {
+        setFines(data.fines || []);
+        setAllFines(data.all_fines || []);
       }
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
@@ -144,6 +169,19 @@ export function GolfLeaderboard({ tournament, userId }: GolfLeaderboardProps) {
           <Star size={16} className="inline mr-1.5" />
           Hero Board
         </button>
+        {tournament.status === 'completed' && (
+          <button
+            onClick={() => setView('fines')}
+            className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
+              view === 'fines'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <div className="inline-block mr-1.5 text-base">💰</div>
+            Fines
+          </button>
+        )}
       </div>
 
       {loading ? (
@@ -335,6 +373,143 @@ export function GolfLeaderboard({ tournament, userId }: GolfLeaderboardProps) {
                   <p className="text-gray-500">No heroes yet! 🦸</p>
                   <p className="text-sm text-gray-400 mt-1">Play some rounds to see the highlights</p>
                 </div>
+              )}
+            </div>
+          )}
+
+          {/* Fines View */}
+          {view === 'fines' && (
+            <div className="p-4 space-y-4">
+              {allFines.length === 0 ? (
+                <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+                  <div className="text-4xl mb-3">💰</div>
+                  <p className="text-gray-500">No fines yet!</p>
+                  <p className="text-sm text-gray-400 mt-1">Fines are calculated when the tournament ends</p>
+                </div>
+              ) : (
+                <>
+                  {/* Wooden Spoon Highlight */}
+                  {allFines.find(f => f.fine_type === 'wooden_spoon') && (
+                    <div className="bg-gradient-to-br from-amber-100 to-orange-100 rounded-xl border-2 border-amber-400 p-6 shadow-lg">
+                      <div className="text-center">
+                        <div className="text-6xl mb-3">🥄</div>
+                        <div className="text-2xl font-bold text-amber-900 mb-2">The Wooden Spoon</div>
+                        <div className="text-lg font-semibold text-amber-800">
+                          {allFines.find(f => f.fine_type === 'wooden_spoon')?.participant.player_name}
+                        </div>
+                        <div className="text-sm text-amber-700 mt-2">
+                          {allFines.find(f => f.fine_type === 'wooden_spoon')?.stat_value}
+                        </div>
+                        <div className="text-xs text-amber-600 mt-1 italic">
+                          Last place finisher - the ultimate &quot;honor&quot;!
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tournament Stats Summary */}
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-4">
+                    <div className="text-center">
+                      <div className="text-sm font-medium text-blue-900 mb-1">Tournament Fines Summary</div>
+                      <div className="text-3xl font-bold text-blue-600">
+                        {allFines.filter(f => f.fine_type !== 'tournament_winner').length} fines awarded! 🍺
+                      </div>
+                      <div className="text-xs text-blue-700 mt-1">
+                        Based on 10 statistical categories
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* All Fines as Cards */}
+                  <div className="space-y-3">
+                    <div className="text-lg font-bold text-gray-900 mb-2">🎯 Fine Breakdown</div>
+                    {allFines
+                      .filter(f => f.fine_type !== 'wooden_spoon') // Already shown above
+                      .map((fine, idx) => (
+                        <div
+                          key={fine.id || idx}
+                          className={`rounded-lg border-2 p-4 ${
+                            fine.fine_type === 'tournament_winner'
+                              ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300'
+                              : 'bg-white border-gray-200'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <div className="text-2xl">{fine.title.split(' ')[0]}</div>
+                                <div className={`font-bold ${
+                                  fine.fine_type === 'tournament_winner' ? 'text-green-700' : 'text-gray-900'
+                                }`}>
+                                  {fine.title.substring(fine.title.indexOf(' ') + 1)}
+                                </div>
+                              </div>
+                              <div className="text-sm text-gray-600 mb-2">
+                                {fine.reason}
+                              </div>
+                              <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${
+                                fine.fine_type === 'tournament_winner'
+                                  ? 'bg-green-100 text-green-700'
+                                  : 'bg-blue-100 text-blue-700'
+                              }`}>
+                                <span className="font-bold">{fine.participant.player_name}</span>
+                                <span>•</span>
+                                <span>{fine.stat_value}</span>
+                              </div>
+                            </div>
+                            <div className={`text-3xl font-bold px-3 py-2 rounded-lg ${
+                              fine.fine_type === 'tournament_winner'
+                                ? 'bg-green-200 text-green-700'
+                                : 'bg-amber-100 text-amber-700'
+                            }`}>
+                              {fine.fine_type === 'tournament_winner' ? '✨' : '🍺'}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+
+                  {/* Player Totals */}
+                  <div className="space-y-3 mt-6">
+                    <div className="text-lg font-bold text-gray-900 mb-2">👥 Player Totals</div>
+                    {fines
+                      .sort((a, b) => b.total_fines - a.total_fines)
+                      .map((participant) => (
+                        <div
+                          key={participant.participant_id}
+                          className={`bg-white rounded-lg border-2 p-4 ${
+                            participant.participant_id === userId ? 'border-blue-400 bg-blue-50' : 'border-gray-200'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="text-3xl">
+                                {participant.total_fines > 2 ? '😱' : participant.total_fines > 0 ? '🍺' : '🎉'}
+                              </div>
+                              <div>
+                                <div className="font-semibold text-gray-900">
+                                  {participant.player_name}
+                                  {participant.participant_id === userId && (
+                                    <span className="ml-2 text-xs bg-blue-500 text-white px-2 py-0.5 rounded">You</span>
+                                  )}
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  {participant.fines.length} fine{participant.fines.length !== 1 ? 's' : ''} awarded
+                                </div>
+                              </div>
+                            </div>
+                            <div className={`text-3xl font-bold px-4 py-2 rounded-lg ${
+                              participant.total_fines > 0
+                                ? 'bg-amber-100 text-amber-700'
+                                : 'bg-green-100 text-green-700'
+                            }`}>
+                              {participant.total_fines > 0 ? `${participant.total_fines}🍺` : '✨'}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </>
               )}
             </div>
           )}

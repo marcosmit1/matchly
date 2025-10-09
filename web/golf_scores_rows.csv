@@ -1,0 +1,5 @@
+id,tournament_id,participant_id,hole_number,strokes,putts,fairway_hit,green_in_regulation,is_eagle,is_birdie,is_par,is_bogey,is_double_bogey_plus,created_at,updated_at,bunker,penalties
+64159173-55b6-48db-803e-852fad038d1c,68da5d0d-a99f-4a43-bcb9-1d76766f2891,2a614b87-305c-463c-b622-d664b8f34b69,1,3,1,false,false,false,true,false,false,false,2025-10-09 19:08:04.029595+00,2025-10-09 19:08:04.029595+00,false,0
+b557e168-eb9e-4bc8-8395-c37692d9ac31,68da5d0d-a99f-4a43-bcb9-1d76766f2891,3d3d66fd-75dd-4ca7-a2d6-92cd5d605ae8,1,5,2,false,false,false,false,false,true,false,2025-10-09 19:07:50.617453+00,2025-10-09 19:07:50.617453+00,false,0
+cdc113f6-9aad-4687-a1ae-204ac810aa89,12129b6a-3bc1-4c39-a4ec-db3551a3c270,1667c1cd-2694-45f5-8c35-9e2e3b9d5136,1,5,2,true,false,false,false,false,true,false,2025-10-09 19:00:33.748603+00,2025-10-09 19:00:34.903876+00,false,0
+d5472a42-a6cc-4e39-861c-c7a281fc270f,68da5d0d-a99f-4a43-bcb9-1d76766f2891,096ac1a4-00ee-407d-b60c-8e29a09a80f3,1,2,0,false,false,true,false,false,false,false,2025-10-09 18:50:20.254517+00,2025-10-09 18:50:28.205941+00,false,0
